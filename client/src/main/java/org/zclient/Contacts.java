@@ -15,7 +15,7 @@ import java.util.List;
 
 public class Contacts {
 
-    Roster roster;
+    private Roster roster;
     public Contacts(AbstractXMPPConnection connection){
         roster = Roster.getInstanceFor(connection);
 
