@@ -10,8 +10,8 @@ public class Main {
         Connection connection = new Connection("alumchat.fun");
         Authentication auth = new Authentication();
 
-        String username, password, email = "";
-        String option, auth_opt, user_opt;
+        String username, password, email, to_user, msg = "";
+        String option, auth_opt, user_opt, comunication_opt;
 
         do {
             System.out.println("------***** Chat Sistemas Operativos 2.0 ******-------");
@@ -33,13 +33,11 @@ public class Main {
 
                     do {
                         System.out.println("1 - Users");
-                        System.out.println("2 - Chat");
-                        System.out.println("3 - Group chat");
-                        System.out.println("4 - Edit profile");
-                        System.out.println("5 - Files");
+                        System.out.println("2 - Messaging");
+                        System.out.println("3 - Edit profile");
                         // If disconnect is selected it should return to the old menu
-                        System.out.println("6 - Disconnect");
-                        System.out.println("7 - Exit");
+                        System.out.println("4 - Disconnect");
+                        System.out.println("5 - Go back");
 
                         auth_opt = read.nextLine();
 
@@ -73,12 +71,43 @@ public class Main {
                                     }
                                 } while (!"exit".equals(user_opt));
                             }
-                            case "2" -> {}
+                            case "2" -> {
+                                Contacts contacts = new Contacts(connection.getStream());
+                                Communication communication = new Communication(connection.getStream());
+                                communication.incomeListener();
+                                do {
+                                    // The message can also be a file
+                                    System.out.println("1 - Direct Message");
+                                    System.out.println("2 - Join a group");
+                                    System.out.println("3 - Go back");
+
+                                    comunication_opt = read.nextLine();
+
+                                    switch (comunication_opt) {
+                                        case "1" -> {
+                                            System.out.println("To: ");
+                                            to_user = read.nextLine();
+                                            System.out.println("Message: ");
+                                            msg = read.nextLine();
+                                            communication.sendDirectmessage(to_user, msg);
+                                        }
+                                        case "2" -> {
+                                            connection.start();
+                                            System.out.println("Email: ");
+                                            email = read.nextLine();
+                                            System.out.println("Username:");
+                                            username = read.nextLine();
+                                            contacts.addContact(email, username);
+
+                                        }
+                                        case "3" -> comunication_opt = "exit";
+                                        default -> System.out.println("Invalid option. Try again...");
+                                    }
+                                } while (!"exit".equals(comunication_opt));
+                            }
                             case "3" -> {}
-                            case "4" -> {}
-                            case "5" -> System.out.println("TODO");
-                            case "6" -> connection.close();
-                            case "7" -> auth_opt = "exit";
+                            case "4" -> connection.close();
+                            case "5" -> auth_opt = "exit";
                             default -> System.out.println("Invalid option. Try again...");
                         }
                     } while (!"exit".equals(auth_opt));
