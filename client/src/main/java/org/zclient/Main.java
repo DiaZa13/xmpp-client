@@ -10,14 +10,13 @@ public class Main {
         Connection connection = new Connection("alumchat.fun");
         Authentication auth = new Authentication();
 
-        System.out.println("Chat Sistemas Operativos 2.0");
-
         String username, password, email = "";
-        String option, auth_opt;
+        String option, auth_opt, user_opt;
 
         do {
-            System.out.println("1 - Sing in");
-            System.out.println("2 - Sing up");
+            System.out.println("------***** Chat Sistemas Operativos 2.0 ******-------");
+            System.out.println("1 - Sign in");
+            System.out.println("2 - Sign up");
             System.out.println("3 - Exit");
 
             option = read.nextLine();
@@ -34,33 +33,52 @@ public class Main {
 
                     do {
                         System.out.println("1 - Users");
-                        System.out.println("4 - Chat");
-                        System.out.println("5 - Group chat");
-                        System.out.println("6 - Edit profile");
-                        System.out.println("8 - Files");
+                        System.out.println("2 - Chat");
+                        System.out.println("3 - Group chat");
+                        System.out.println("4 - Edit profile");
+                        System.out.println("5 - Files");
                         // If disconnect is selected it should return to the old menu
-                        System.out.println("9 - Disconnect");
-                        System.out.println("10 - Exit");
+                        System.out.println("6 - Disconnect");
+                        System.out.println("7 - Exit");
 
                         auth_opt = read.nextLine();
 
                         switch (auth_opt) {
                             case "1" -> {
-                                System.out.println("2 - Add user to contacts");
-                                System.out.println("3 - Details of a contact");
-//                                Roster roster = Roster.getInstanceFor(connection);
-//                                Collection<RosterEntry> entries = roster.getEntries();
-//                                for (RosterEntry entry : entries) {
-//                                    System.out.println(entry);
-//                                }
+                                Contacts contacts = new Contacts(connection.getStream());
+                                do {
+                                    System.out.println("1 - Show contacts");
+                                    System.out.println("2 - Add contact");
+                                    System.out.println("3 - Details of a contact");
+                                    System.out.println("4 - Go back");
 
-                            }
-                            case "2", "3", "5", "6", "7", "8" -> System.out.println("TODO");
-                            case "4" -> {
+                                    user_opt = read.nextLine();
 
+                                    switch (user_opt) {
+                                        case "1" -> contacts.getContacts();
+                                        case "2" -> {
+                                            connection.start();
+                                            System.out.println("Email: ");
+                                            email = read.nextLine();
+                                            System.out.println("Username:");
+                                            username = read.nextLine();
+                                            contacts.addContact(email, username);
+
+                                        }
+                                        case "3" ->{
+                                            System.out.println("TODO");
+                                        }
+                                        case "4" -> user_opt = "exit";
+                                        default -> System.out.println("Invalid option. Try again...");
+                                    }
+                                } while (!"exit".equals(user_opt));
                             }
-                            case "9" -> connection.close();
-                            case "10" -> auth_opt = "exit";
+                            case "2" -> {}
+                            case "3" -> {}
+                            case "4" -> {}
+                            case "5" -> System.out.println("TODO");
+                            case "6" -> connection.close();
+                            case "7" -> auth_opt = "exit";
                             default -> System.out.println("Invalid option. Try again...");
                         }
                     } while (!"exit".equals(auth_opt));
