@@ -12,8 +12,7 @@
         <maven.compiler.source>18</maven.compiler.source>
         <maven.compiler.target>18</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>.
-
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.igniterealtime.smack</groupId>
@@ -36,4 +35,5 @@
             <version>4.4.0-beta2</version>
         </dependency>
     </dependencies>
+
 </project>
