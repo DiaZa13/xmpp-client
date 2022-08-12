@@ -44,7 +44,9 @@ public class Connection {
     public void presenceListener(){
         StanzaListener listener = stanza -> {
             Presence presence = (Presence) stanza;
-            System.out.printf("%s, presence: %s -> %s \n",presence.getFrom(), presence.getType(), presence.getStatus());
+            if (!presence.getFrom().equals(stream.getUser())){
+                System.out.printf("%s presence: %s -> %s \n",presence.getFrom(), presence.getType(), presence.getStatus());
+            }
         };
 
 
@@ -56,7 +58,9 @@ public class Connection {
     public void messageListener(){
         StanzaListener listener = stanza -> {
             Message message = (Message) stanza;
-            System.out.printf("%s:, %s \n",message.getFrom(), message.getBody());
+            if (message.getBody().equals("null")){
+                System.out.printf("%s:, %s \n",message.getFrom(), message.getBody());
+            }
         };
 
         StanzaFilter message_filter = new StanzaTypeFilter(Message.class);
