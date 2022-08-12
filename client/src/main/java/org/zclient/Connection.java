@@ -10,8 +10,13 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Connection {
+    public static final String GREEN_BOLD = "\033[1;32m";  // GREEN
+    public static final String RED = "\033[0;31m";     // RED
+    public static final String RESET = "\033[0m";  // Text Reset
     private String domain;
     AbstractXMPPConnection stream;
 
@@ -45,7 +50,10 @@ public class Connection {
         StanzaListener listener = stanza -> {
             Presence presence = (Presence) stanza;
             if (!presence.getFrom().equals(stream.getUser())){
-                System.out.printf("%s presence: %s -> %s \n",presence.getFrom(), presence.getType(), presence.getStatus());
+                String color = presence.getType().equals(Presence.Type.available)?GREEN_BOLD:RED;
+                System.out.printf(color + "📗 \033[0m%s %s... \n",
+                        presence.getFrom(),
+                        presence.getStatus() != null?"status is " + presence.getStatus():"has no status");
             }
         };
 
@@ -55,11 +63,14 @@ public class Connection {
         stream.addStanzaListener(listener, presence_filter);
     }
 
+    // TODO add nickname to conference chats
     public void messageListener(){
         StanzaListener listener = stanza -> {
             Message message = (Message) stanza;
-            if (message.getBody().equals("null")){
-                System.out.printf("%s:, %s \n",message.getFrom(), message.getBody());
+            if (message.getBody() != null){
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+                LocalDateTime now = LocalDateTime.now();
+                System.out.printf("\033[0;93m[" + dtf.format(now) + "]\033[1;94m %s: \033[0;34m%s \033[0m\n", message.getFrom().asBareJid(), message.getBody());
             }
         };
 
