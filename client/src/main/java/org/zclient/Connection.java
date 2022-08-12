@@ -12,7 +12,7 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import java.io.IOException;
 
 public class Connection {
-    private String domain = "";
+    private String domain;
     AbstractXMPPConnection stream;
 
     public Connection(String domain){
