@@ -13,10 +13,15 @@ import java.util.Map;
 
 public class Authentication{
 
-    public Authentication(){
+    private AbstractXMPPConnection connection;
+    private AccountManager accountManager;
+
+    public Authentication(AbstractXMPPConnection connection){
+        this.accountManager = AccountManager.getInstance(connection);
+        this.connection = connection;
     }
 
-    public void singIn(AbstractXMPPConnection connection, User user){
+    public void singIn(User user){
         // If the connection is still active, then try to sign in
         if (connection.isConnected()){
             try {
@@ -28,9 +33,8 @@ public class Authentication{
 
     }
 
-    public void singUp(AbstractXMPPConnection connection, User user, String email){
+    public void singUp(User user, String email){
 
-        AccountManager accountManager = AccountManager.getInstance(connection);
         Map<String, String> attributes = new HashMap<String, String>();
         // establish the rest of the attributes
         attributes.put("email", email);
@@ -46,4 +50,14 @@ public class Authentication{
             }
         }
     }
+
+    public void deleteAccount(){
+        try {
+            this.accountManager.deleteAccount();
+        } catch (SmackException.NoResponseException | XMPPException.XMPPErrorException |
+                 SmackException.NotConnectedException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
