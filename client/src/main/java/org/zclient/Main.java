@@ -1,5 +1,6 @@
 package org.zclient;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
@@ -13,6 +14,8 @@ public class Main {
         String username, password, email, to_user, msg = "";
         String option, auth_opt, user_opt, comunication_opt;
 
+        // revisar sino es mejor conectarme desde el constructor
+
         do {
             System.out.println("------***** Chat Sistemas Operativos 2.0 ******-------");
             System.out.println("1 - Sign in");
@@ -24,93 +27,68 @@ public class Main {
             switch (option) {
                 case "1" -> {
                     connection.start();
-                    System.out.println("Username: ");
+                    System.out.print("Username: ");
                     username = read.nextLine();
-                    System.out.println("Password:");
+                    System.out.print("Password:");
                     password = read.nextLine();
                     User user = new User(username, password);
                     auth.singIn(connection.getStream(), user);
 
-                    do {
-                        System.out.println("1 - Users");
-                        System.out.println("2 - Messaging");
-                        System.out.println("3 - Edit profile");
-                        // If disconnect is selected it should return to the old menu
-                        System.out.println("4 - Disconnect");
-                        System.out.println("5 - Go back");
+                    // Cleaning the coso para hacer saber que inició sesión
+                    System.out.printf(" %s  -> Available", username);
 
+                    Contacts contacts = new Contacts(connection.getStream());
+                    Communication communication = new Communication(connection.getStream());
+                    // Listen for presences
+                    connection.presenceListener();
+                    // Listen for messages
+                    connection.messageListener();
+                    // TODO hacer algo para indicar que se ha loggeado correctamente
+                    System.out.println("\n\nType -help to see available options... ");
+                    do{
                         auth_opt = read.nextLine();
+                        if (auth_opt.equals("-help")){
+                                System.out.println("-users\t show users/contacts");
+                                System.out.println("-add<username, email> \t add a user to contacts");
+                                System.out.println("-details<user jid> \t details of a user");
+                                System.out.println("-msg<user/group jid, msg/file> \t sends a message o file to a group or user");
+                                System.out.println("-join<room@service/nickname> \t join a chat room");
+                                System.out.println("-edit \t edit user profile");
+                                // Buscar manera de hacer logout sin desconectar de server
+                                System.out.println("-exit \t logout");
+                        } else if (auth_opt.startsWith("-users")) {
+                            contacts.getContacts();
 
-                        switch (auth_opt) {
-                            case "1" -> {
-                                Contacts contacts = new Contacts(connection.getStream());
-                                do {
-                                    System.out.println("1 - Show contacts");
-                                    System.out.println("2 - Add contact");
-                                    System.out.println("3 - Details of a contact");
-                                    System.out.println("4 - Go back");
+                        } else if (auth_opt.startsWith("-add")) {
+                            String data = auth_opt.substring(5,auth_opt.length()-1);
+                            String[] parts = data.split(",");
+                            username = parts[0];
+                            email = parts[1];
+                            contacts.addContact(email, username);
 
-                                    user_opt = read.nextLine();
+                        } else if (auth_opt.startsWith("-details")) {
+                            // TODO
+                            username = auth_opt.substring(9,auth_opt.length()-1);
 
-                                    switch (user_opt) {
-                                        case "1" -> contacts.getContacts();
-                                        case "2" -> {
-                                            connection.start();
-                                            System.out.println("Email: ");
-                                            email = read.nextLine();
-                                            System.out.println("Username:");
-                                            username = read.nextLine();
-                                            contacts.addContact(email, username);
+                        } else if (auth_opt.startsWith("-msg")) {
+                            String data = auth_opt.substring(5, auth_opt.length()-1);
+                            String[] parts = data.split(",");
+                            to_user = parts[0];
+                            msg = parts[1];
+                            communication.sendMessage(to_user, msg, true);
+                            // TODO message to a group
+                            // TODO send files
 
-                                        }
-                                        case "3" ->{
-                                            System.out.println("TODO");
-                                        }
-                                        case "4" -> user_opt = "exit";
-                                        default -> System.out.println("Invalid option. Try again...");
-                                    }
-                                } while (!"exit".equals(user_opt));
-                            }
-                            case "2" -> {
-                                Contacts contacts = new Contacts(connection.getStream());
-                                Communication communication = new Communication(connection.getStream());
-                                communication.incomeListener();
-                                do {
-                                    // The message can also be a file
-                                    System.out.println("1 - Direct Message");
-                                    System.out.println("2 - Join a group");
-                                    System.out.println("3 - Go back");
+                        } else if (auth_opt.startsWith("-join")) {
+                            // TODO
+                            String group = auth_opt.substring(6, auth_opt.length()-1);
+                            communication.joinGroup(group);
 
-                                    comunication_opt = read.nextLine();
+                        } else if (auth_opt.startsWith("-edit")) {
+                           // Debe de seleccionar qué quiere editar
 
-                                    switch (comunication_opt) {
-                                        case "1" -> {
-                                            System.out.println("To: ");
-                                            to_user = read.nextLine();
-                                            System.out.println("Message: ");
-                                            msg = read.nextLine();
-                                            communication.sendDirectmessage(to_user, msg);
-                                        }
-                                        case "2" -> {
-                                            connection.start();
-                                            System.out.println("Email: ");
-                                            email = read.nextLine();
-                                            System.out.println("Username:");
-                                            username = read.nextLine();
-                                            contacts.addContact(email, username);
-
-                                        }
-                                        case "3" -> comunication_opt = "exit";
-                                        default -> System.out.println("Invalid option. Try again...");
-                                    }
-                                } while (!"exit".equals(comunication_opt));
-                            }
-                            case "3" -> {}
-                            case "4" -> connection.close();
-                            case "5" -> auth_opt = "exit";
-                            default -> System.out.println("Invalid option. Try again...");
                         }
-                    } while (!"exit".equals(auth_opt));
+                    }while (!"-exit".equals(auth_opt));
 
                 }
                 case "2" -> {
@@ -126,7 +104,10 @@ public class Main {
 
                     System.out.println("The account was created successfully");
                 }
-                case "3" -> System.exit(0);
+                case "3" -> {
+                    connection.close();
+                    System.exit(0);
+                }
                 default -> System.out.println("Invalid option. Try again...");
             }
         } while (true);
