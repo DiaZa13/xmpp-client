@@ -2,29 +2,24 @@ package org.zclient;
 
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.filter.StanzaFilter;
-import org.jivesoftware.smack.filter.StanzaTypeFilter;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
-import org.jivesoftware.smack.roster.SubscribeListener;
 import org.jxmpp.jid.BareJid;
 import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
 import java.util.Collection;
-import java.util.List;
 
 public class Contacts {
 
     private Roster roster;
+
     public Contacts(AbstractXMPPConnection connection){
         roster = Roster.getInstanceFor(connection);
-        final Roster.SubscriptionMode manual = Roster.SubscriptionMode.manual;
-
+        roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
 
     }
 
@@ -70,15 +65,36 @@ public class Contacts {
 
     }
 
-    public void handleSubscription(Boolean response){
-        SubscribeListener lister = new SubscribeListener() {
-            @Override
-            public SubscribeAnswer processSubscribe(Jid jid, Presence presence) {
-                System.out.printf("%s wants to add you to its ");
-                return null;
-            }
-        };
+    public void handleSubscription(AbstractXMPPConnection connection, String response, Jid to){
+        try {
+            if (response.equalsIgnoreCase("2")){
+                System.out.println("Rejected request");
+                Presence presence_response = connection.getStanzaFactory()
+                        .buildPresenceStanza()
+                        .to(JidCreate.from(to))
+                        .ofType(Presence.Type.unsubscribed)
+                        .build();
 
-        roster.addSubscribeListener(lister);
+                connection.sendStanza(presence_response);
+            } else {
+                System.out.println("** \033[0;37mAccepted request \033[0m");
+                Presence presence_response = connection.getStanzaFactory()
+                        .buildPresenceStanza()
+                        .to(to)
+                        .ofType(Presence.Type.subscribed)
+                        .build();
+
+                Presence request = connection.getStanzaFactory()
+                        .buildPresenceStanza()
+                        .to(to)
+                        .ofType(Presence.Type.subscribe)
+                        .build();
+
+                connection.sendStanza(presence_response);
+                connection.sendStanza(request);
+            }
+        }catch (SmackException.NotConnectedException | InterruptedException | XmppStringprepException e) {
+                throw new RuntimeException(e);
+            }
     }
 }

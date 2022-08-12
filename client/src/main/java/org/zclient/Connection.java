@@ -9,16 +9,21 @@ import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Scanner;
 
 public class Connection {
-    public static final String GREEN_BOLD = "\033[1;32m";  // GREEN
-    public static final String RED = "\033[0;31m";     // RED
-    public static final String RESET = "\033[0m";  // Text Reset
+    public static final String GREEN_BOLD = "\033[1;32m";
+    public static final String RED = "\033[1;31m";
     private String domain;
-    AbstractXMPPConnection stream;
+    private AbstractXMPPConnection stream;
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+    Scanner read = new Scanner(System.in);
 
     public Connection(String domain){
         this.domain = domain;
@@ -46,38 +51,64 @@ public class Connection {
         return stream;
     }
 
-    public void presenceListener(){
+    public void presenceListener(Contacts contact){
         StanzaListener listener = stanza -> {
             Presence presence = (Presence) stanza;
             if (!presence.getFrom().equals(stream.getUser())){
-                String color = presence.getType().equals(Presence.Type.available)?GREEN_BOLD:RED;
-                System.out.printf(color + "📗 \033[0m%s %s... \n",
-                        presence.getFrom(),
-                        presence.getStatus() != null?"status is " + presence.getStatus():"has no status");
-            }
-        };
+            if (presence.getType().equals(Presence.Type.subscribe)){
+                new Thread(() -> {
+                    System.out.printf("\033[1;33m** %s wants to subscribe to your roster \033[0m\n", presence.getFrom());
+                    System.out.print("\033[0;37m   Do you accept the subscription?\n");
+                    System.out.println("\t1 - Accept");
+                    System.out.println("\t2 - Reject");
+                    read.nextLine();
+                    String response = read.nextLine();
 
+                    contact.handleSubscription(stream, response, presence.getFrom());
+
+                }).start();
+
+            } else if (presence.getType().equals(Presence.Type.subscribed)) {
+                System.out.printf("\033[1;33m** %s is subscribed to your roster \033[0m\n", presence.getFrom());
+            } else if (presence.getType().equals(Presence.Type.unsubscribed)) {
+                System.out.printf("\033[1;33m** %s is unsubscribed to your roster \033[0m\n", presence.getFrom());
+            } else if (presence.getType().equals(Presence.Type.available)) {
+                System.out.printf(GREEN_BOLD + "** %s is available \033[0m\n", presence.getFrom());
+            } else if (presence.getType().equals(Presence.Type.unavailable)) {
+                System.out.printf(RED + "** %s is unavailable \033[0m\n", presence.getFrom());
+            } else{
+                    System.out.printf("\033[1;33m** %s has updated its status to %s... \033[0m\n", presence.getFrom(),
+                            presence.getStatus() != null?presence.getStatus():" - ");
+                }
+            }
+
+        };
 
         StanzaFilter presence_filter = new StanzaTypeFilter(Presence.class);
 
+        // Managing async the incoming presences
         stream.addStanzaListener(listener, presence_filter);
+
     }
 
-    // TODO add nickname to conference chats
     public void messageListener(){
         StanzaListener listener = stanza -> {
             Message message = (Message) stanza;
             if (message.getBody() != null){
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
                 LocalDateTime now = LocalDateTime.now();
-                System.out.printf("\033[0;93m[" + dtf.format(now) + "]\033[1;94m %s: \033[0;34m%s \033[0m\n", message.getFrom().asBareJid(), message.getBody());
+                if (message.getFrom().toString().contains("conference")){
+                    System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;94m %s: \033[0;34m%s \033[0m\n", message.getFrom(), message.getBody());
+                }else
+                    System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;95m %s: \033[0;37m%s \033[0m\n", message.getFrom().asBareJid(), message.getBody());
             }
         };
 
         StanzaFilter message_filter = new StanzaTypeFilter(Message.class);
 
-        stream.addStanzaListener(listener, message_filter);
+        // Managing async the incoming messages
+        new Thread(() -> stream.addStanzaListener(listener, message_filter)).start();
     }
+
 
     // maybe i have to remove the listeners
     public void close(){

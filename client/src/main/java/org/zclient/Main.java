@@ -37,12 +37,14 @@ public class Main {
                     authentication.singIn(user);
 
                     // Cleaning the coso para hacer saber que inició sesión
+                    System.out.print("\033[H\033[2J");
+                    System.out.flush();
                     System.out.printf(" %s  -> Available", username);
 
                     Contacts contacts = new Contacts(connection.getStream());
                     Communication communication = new Communication(connection.getStream());
                     // Listen for presences
-                    connection.presenceListener();
+                    connection.presenceListener(contacts);
                     // Listen for messages
                     connection.messageListener();
                     // TODO hacer algo para indicar que se ha loggeado correctamente
