@@ -52,12 +52,13 @@ public class Contacts {
         try {
             RosterEntry information = roster.getEntry(JidCreate.bareFrom(user));
             Presence presence = roster.getPresence(JidCreate.bareFrom(user));
-            return String.format("🧑 %s%n\tName: %s%n\tPresence: %s%n\tStatus: %s%n\tShow: %s%n" ,
+            return String.format("\nUser JID: %s%n\tName: %s%n\tPresence: %s%n\tStatus: %s%n\tShow: %s%n\tContact: %s" ,
                     information.getJid(),
-                    !information.getName().isEmpty()?information.getName():"-",
+                    information.getName() != null?information.getName():"-",
                     presence.getType(),
-                    !presence.getStatus().isEmpty()?presence.getStatus():"-",
-                    presence.getMode());
+                    presence.getStatus() != null?presence.getStatus():"-",
+                    presence.getMode(),
+                    roster.isSubscribedToMyPresence(JidCreate.bareFrom(user)));
 
         } catch (XmppStringprepException e) {
             throw new RuntimeException(e);
@@ -68,7 +69,7 @@ public class Contacts {
     public void handleSubscription(AbstractXMPPConnection connection, String response, Jid to){
         try {
             if (response.equalsIgnoreCase("2")){
-                System.out.println("Rejected request");
+                System.out.println("**\n\033[0;37m Rejected request \033[0m");
                 Presence presence_response = connection.getStanzaFactory()
                         .buildPresenceStanza()
                         .to(JidCreate.from(to))
@@ -77,7 +78,7 @@ public class Contacts {
 
                 connection.sendStanza(presence_response);
             } else {
-                System.out.println("** \033[0;37mAccepted request \033[0m");
+                System.out.println("**\n\033[0;37mAccepted request \033[0m");
                 Presence presence_response = connection.getStanzaFactory()
                         .buildPresenceStanza()
                         .to(to)

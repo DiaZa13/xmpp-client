@@ -39,7 +39,7 @@ public class Main {
                     // Cleaning the coso para hacer saber que inició sesión
                     System.out.print("\033[H\033[2J");
                     System.out.flush();
-                    System.out.printf(" %s  -> Available", username);
+                    System.out.printf("\033[46m (available) %s                                                                        \033[0m", connection.getStream().getUser());
 
                     Contacts contacts = new Contacts(connection.getStream());
                     Communication communication = new Communication(connection.getStream());
@@ -50,6 +50,7 @@ public class Main {
                     // TODO hacer algo para indicar que se ha loggeado correctamente
                     System.out.println("\n\nType -help to see available options... ");
                     do{
+                        System.out.print("\n");
                         auth_opt = read.nextLine();
                         if (auth_opt.equals("-help")){
                                 System.out.println("\t\033[0;37m-users                            show users/contacts");
@@ -105,11 +106,11 @@ public class Main {
                 case "2" -> {
                     connection.start();
                     Authentication authentication = new Authentication(connection.getStream());
-                    System.out.println("Username: ");
+                    System.out.print("Username: ");
                     username = read.nextLine();
-                    System.out.println("Password:");
+                    System.out.print("Password: ");
                     password = read.nextLine();
-                    System.out.println("Email:");
+                    System.out.print("Email: ");
                     email = read.nextLine();
                     User user = new User(username, password);
                     authentication.singUp(user, email);
