@@ -8,6 +8,11 @@ public class Main {
         // object to read from console
         Scanner read = new Scanner(System.in);
         Connection connection = new Connection("alumchat.fun");
+        // It can reuse the listeners between connections
+        // Listen for messages
+        connection.messageListener();
+        // Listen for presences
+        connection.presenceListener();
 
         String username, password, email, to_user, msg, data = "";
         String option, auth_opt;
@@ -34,73 +39,76 @@ public class Main {
                     System.out.print("Password: ");
                     password = read.nextLine();
                     User user = new User(username, password);
-                    authentication.singIn(user);
 
-                    // Cleaning the coso para hacer saber que inició sesión
-                    System.out.print("\033[H\033[2J");
-                    System.out.flush();
-                    System.out.printf("\033[46m (available) %s                                                                        \033[0m", connection.getStream().getUser());
+                    if (!authentication.singIn(user)){
+                        System.out.println("\n\033[0;37m** It was an error while trying to log in \033[0m");
+                    }else {
+                        // Cleaning the console to let the user know that its log in was successful
+                        System.out.print("\033[H\033[2J");
+                        System.out.flush();
+                        System.out.printf("\033[48:5:203m%s\033[F\033[0m", connection.getStream().getUser());
 
-                    Contacts contacts = new Contacts(connection.getStream());
-                    Communication communication = new Communication(connection.getStream());
-                    // Listen for presences
-                    connection.presenceListener(contacts);
-                    // Listen for messages
-                    connection.messageListener();
-                    // TODO hacer algo para indicar que se ha loggeado correctamente
-                    System.out.println("\n\nType -help to see available options... ");
-                    do{
-                        System.out.print("\n");
-                        auth_opt = read.nextLine();
-                        if (auth_opt.equals("-help")){
+                        Contacts contacts = new Contacts(connection.getStream());
+                        Communication communication = new Communication(connection.getStream());
+
+                        do{
+                            auth_opt = read.nextLine();
+                            if (auth_opt.equals("-help")){
                                 System.out.println("\t\033[0;37m-users                            show users/contacts");
-                                System.out.println("\t-add<username, email>             add a user to contacts");
-                                System.out.println("\t-details<user jid>                details of a user");
+                                System.out.println("\t-add<email>             add a user to contacts");
+                                System.out.println("\t-details<email>                details of a user");
                                 System.out.println("\t-msg<user/group jid, msg/file>    sends a message o file to a group or user");
                                 System.out.println("\t-join<room@service/nickname>      join a chat room");
                                 System.out.println("\t-presence<new presence>           edit user profile");
                                 System.out.println("\t-delete                           delete the actual logged account");
                                 System.out.println("\t-logout                           logout \033[0m");
-                        } else if (auth_opt.startsWith("-users")) {
-                            contacts.getContacts();
 
-                        } else if (auth_opt.startsWith("-add")) {
-                            data = auth_opt.substring(5,auth_opt.length()-1);
-                            String[] parts = data.split(",");
-                            username = parts[0];
-                            email = parts[1].trim();
-                            contacts.addContact(email, username);
+                            } else if (auth_opt.startsWith("-users")) {
+                                contacts.getContacts();
 
-                        } else if (auth_opt.startsWith("-details")) {
-                            username = auth_opt.substring(9,auth_opt.length()-1);
-                            System.out.println(contacts.contactDetails(username));
+                            } else if (auth_opt.startsWith("-add")) {
+                                email = auth_opt.substring(5,auth_opt.length()-1);
 
-                        } else if (auth_opt.startsWith("-msg")) {
-                            data = auth_opt.substring(5, auth_opt.length()-1);
-                            String[] parts = data.split(",");
-                            to_user = parts[0];
-                            msg = parts[1].trim();
+                                System.out.printf("\033[%d;%dH", 21, 1);
 
-                            if (to_user.contains("conference"))communication.groupMessage(to_user, msg);
-                            else communication.directMessage(to_user, msg);
+                                if (contacts.addContact(email)){
+                                    System.out.print("\n\033[0;**The friendship request was sent succesfully\033[0m");
+                                }else
+                                    System.out.print("\n\033[0;**It was an error sending the request\033[0m");
 
-                            // TODO send files
+                            } else if (auth_opt.startsWith("-details")) {
+                                username = auth_opt.substring(9,auth_opt.length()-1);
+                                System.out.println(contacts.contactDetails(username));
 
-                        } else if (auth_opt.startsWith("-join")) {
-                            String group = auth_opt.substring(6, auth_opt.length()-1);
-                            communication.joinGroup(group);
+                            } else if (auth_opt.startsWith("-msg")) {
+                                data = auth_opt.substring(5, auth_opt.length()-1);
+                                String[] parts = data.split(",");
+                                to_user = parts[0];
+                                msg = parts[1].trim();
 
-                        } else if (auth_opt.startsWith("-presence")) {
-                            data = auth_opt.substring(10,auth_opt.length()-1);
-                            user.editPresence(connection.getStream(), data);
+                                if (to_user.contains("conference")) communication.groupMessage(to_user, msg);
+                                else communication.directMessage(to_user, msg);
 
-                        } else if (auth_opt.startsWith("-delete")) {
-                            authentication.deleteAccount();
-                            auth_opt = "-logout";
-                        } else if (auth_opt.equals("-logout")) {
-                            connection.close();
-                        }
-                    }while (!"-logout".equals(auth_opt));
+                                // TODO send files
+
+                            } else if (auth_opt.startsWith("-join")) {
+                                String group = auth_opt.substring(6, auth_opt.length()-1);
+                                communication.joinGroup(group);
+
+                            } else if (auth_opt.startsWith("-presence")) {
+                                data = auth_opt.substring(10,auth_opt.length()-1);
+                                user.editPresence(connection.getStream(), data);
+
+                            } else if (auth_opt.startsWith("-delete")) {
+                                authentication.deleteAccount();
+                                auth_opt = "-logout";
+
+                            } else if (auth_opt.equals("-logout")) {
+                                connection.close();
+
+                            }else System.out.println("Invalid option. Type -help to see available options...");
+                        }while (!"-logout".equals(auth_opt));
+                    }
 
                 }
                 case "2" -> {

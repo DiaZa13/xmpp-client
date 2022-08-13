@@ -13,24 +13,27 @@ import java.util.Map;
 
 public class Authentication{
 
-    private AbstractXMPPConnection connection;
-    private AccountManager accountManager;
+    private final AbstractXMPPConnection connection;
+    private final AccountManager accountManager;
 
     public Authentication(AbstractXMPPConnection connection){
         this.accountManager = AccountManager.getInstance(connection);
         this.connection = connection;
     }
 
-    public void singIn(User user){
+    public boolean singIn(User user){
         // If the connection is still active, then try to sign in
         if (connection.isConnected()){
             try {
                 connection.login(user.username(), user.password());
+                return true;
             } catch (XMPPException | SmackException | InterruptedException | IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+                return false;
             }
         }
 
+        return false;
     }
 
     public void singUp(User user, String email){

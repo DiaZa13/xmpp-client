@@ -17,9 +17,9 @@ import java.util.Scanner;
 public class Connection {
     public static final String GREEN = "\033[1;32m";
     public static final String RED = "\033[1;31m";
-    private String domain;
+    private final String domain;
     private AbstractXMPPConnection stream;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     Scanner read = new Scanner(System.in);
 
@@ -49,24 +49,47 @@ public class Connection {
         return stream;
     }
 
-    public void presenceListener(Contacts contact){
+    public void presenceListener(){
         StanzaListener listener = stanza -> {
             Presence presence = (Presence) stanza;
             if (!presence.getFrom().equals(stream.getUser())){
                 switch (presence.getType()){
                     case subscribe -> {
                         // Request a subscription
-
                             System.out.printf("\n\033[1;33m** %s wants to subscribe to your roster \033[0m", presence.getFrom());
-                            System.out.print("\n\033[0;37m   Do you accept the subscription?");
-                            System.out.println("\n\t1 - Accept");
-                            System.out.println("\n\t2 - Reject");
+                            System.out.print("\n\033[0;37m   Do you want to accept the subscription?");
+                            System.out.print("\n\t1 - Accept");
+                            System.out.print("\n\t2 - Reject");
                             read.nextLine();
                             String response = read.nextLine();
+                            // Handle request subscription
+                            switch (response){
+                                case "1"-> {
+                                    System.out.print("**\n\033[0;37mAccepted request \033[0m");
+                                    Presence presence_response = stream.getStanzaFactory()
+                                            .buildPresenceStanza()
+                                            .to(presence.getFrom())
+                                            .ofType(Presence.Type.subscribed)
+                                            .build();
 
-                            contact.handleSubscription(stream, response, presence.getFrom());
+                                    Presence request = stream.getStanzaFactory()
+                                            .buildPresenceStanza()
+                                            .to(presence.getFrom())
+                                            .ofType(Presence.Type.subscribe)
+                                            .build();
 
+                                    stream.sendStanza(presence_response);
+                                    stream.sendStanza(request);
+                                }
+                                case "2" -> {System.out.print("**\n\033[0;37m Rejected request \033[0m");
+                                    Presence presence_response = stream.getStanzaFactory()
+                                            .buildPresenceStanza()
+                                            .to(presence.getFrom())
+                                            .ofType(Presence.Type.unsubscribed)
+                                            .build();
 
+                                    stream.sendStanza(presence_response);}
+                            }
                     }
                     case subscribed -> System.out.printf("\n\033[1;33m** %s is subscribed to your roster \033[0m", presence.getFrom());
                     case unsubscribed -> System.out.printf("\n\033[1;33m** %s is unsubscribed to your roster \033[0m", presence.getFrom());
@@ -112,7 +135,9 @@ public class Connection {
         stream.addStanzaListener(listener, message_filter);
     }
 
+    public void collector(){
 
+    }
     // maybe i have to remove the listeners
     public void close(){
         stream.disconnect();

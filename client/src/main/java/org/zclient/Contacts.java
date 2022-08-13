@@ -37,13 +37,15 @@ public class Contacts {
 
     }
 
-    public void addContact(String email, String username){
+    public boolean addContact(String email){
         try {
             BareJid jid = JidCreate.bareFrom(email);
-            roster.createItemAndRequestSubscription(jid, username, null);
+            roster.createItemAndRequestSubscription(jid, String.valueOf(jid.getLocalpartOrNull()), null);
+            return true;
         } catch (XmppStringprepException | SmackException.NotLoggedInException | SmackException.NoResponseException |
                  XMPPException.XMPPErrorException | SmackException.NotConnectedException | InterruptedException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return false;
         }
 
     }
