@@ -12,7 +12,7 @@ public record User(String username, String password) {
         }
     }
 
-    public void editPresence(AbstractXMPPConnection connection, String status){
+    public boolean editPresence(AbstractXMPPConnection connection, String status){
         Presence presence = connection.getStanzaFactory()
                 .buildPresenceStanza()
                 .setStatus(status)
@@ -20,8 +20,9 @@ public record User(String username, String password) {
 
         try {
             connection.sendStanza(presence);
+            return true;
         } catch (SmackException.NotConnectedException | InterruptedException e) {
-            throw new RuntimeException(e);
+            return false;
         }
     }
 }

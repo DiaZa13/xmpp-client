@@ -55,7 +55,7 @@ public class Communication {
     /*
     * @param jid → describes the jid in the form <room@service/nickname>
     */
-    public void joinGroup(String jid){
+    public boolean joinGroup(String jid){
         try {
             Presence presence = connection.getStanzaFactory()
                     .buildPresenceStanza()
@@ -63,8 +63,9 @@ public class Communication {
                     .build();
 
             connection.sendStanza(presence);
+            return true;
         } catch (XmppStringprepException | SmackException.NotConnectedException | InterruptedException e) {
-            throw new RuntimeException(e);
+            return false;
         }
     }
 }

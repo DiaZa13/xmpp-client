@@ -15,8 +15,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class Connection {
-    public static final String GREEN = "\033[1;32m";
-    public static final String RED = "\033[1;31m";
     private final String domain;
     private AbstractXMPPConnection stream;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -49,64 +47,61 @@ public class Connection {
         return stream;
     }
 
-    public void presenceListener(){
+    public void presenceListener(Contacts contacts){
         StanzaListener listener = stanza -> {
             Presence presence = (Presence) stanza;
             if (!presence.getFrom().equals(stream.getUser())){
+                System.out.print(util.cursorRestore());
                 switch (presence.getType()){
                     case subscribe -> {
-                        // Request a subscription
-                            System.out.printf("\n\033[1;33m** %s wants to subscribe to your roster \033[0m", presence.getFrom());
-                            System.out.print("\n\033[0;37m   Do you want to accept the subscription?");
-                            System.out.print("\n\t1 - Accept");
-                            System.out.print("\n\t2 - Reject");
-                            read.nextLine();
-                            String response = read.nextLine();
+                            // Request a subscription
+                            System.out.printf("\033[1;33m** %s wants to subscribe to your roster \033[0m%n", presence.getFrom());
+                            System.out.println(util.cursorSave());
+                            System.out.print(util.cursorTo(22,1));
+                            System.out.println("\033[0;37mDo you want to accept the subscription? [Y/n] ");
+                            String response = read.next();
                             // Handle request subscription
-                            switch (response){
-                                case "1"-> {
-                                    System.out.print("**\n\033[0;37mAccepted request \033[0m");
-                                    Presence presence_response = stream.getStanzaFactory()
-                                            .buildPresenceStanza()
-                                            .to(presence.getFrom())
-                                            .ofType(Presence.Type.subscribed)
-                                            .build();
+                        if ("n".equalsIgnoreCase(response)) {
+                            contacts.declineSubscription(stream, presence.getFrom());
 
-                                    Presence request = stream.getStanzaFactory()
-                                            .buildPresenceStanza()
-                                            .to(presence.getFrom())
-                                            .ofType(Presence.Type.subscribe)
-                                            .build();
+                            System.out.print(util.cursorRestore());
+                            System.out.println("\033[0;37m**Accepted request \033[0m");
+                            System.out.println(util.cursorSave());
+                        } else {
+                            contacts.acceptSubscription(stream, presence.getFrom());
 
-                                    stream.sendStanza(presence_response);
-                                    stream.sendStanza(request);
-                                }
-                                case "2" -> {System.out.print("**\n\033[0;37m Rejected request \033[0m");
-                                    Presence presence_response = stream.getStanzaFactory()
-                                            .buildPresenceStanza()
-                                            .to(presence.getFrom())
-                                            .ofType(Presence.Type.unsubscribed)
-                                            .build();
-
-                                    stream.sendStanza(presence_response);}
-                            }
+                            System.out.print(util.cursorRestore());
+                            System.out.println("\033[0;37m**Rejected request \033[0m");
+                            System.out.println(util.cursorSave());
+                        }
                     }
-                    case subscribed -> System.out.printf("\n\033[1;33m** %s is subscribed to your roster \033[0m", presence.getFrom());
-                    case unsubscribed -> System.out.printf("\n\033[1;33m** %s is unsubscribed to your roster \033[0m", presence.getFrom());
+                    case subscribed -> {
+                        System.out.printf("\033[1;33m** %s is subscribed to your roster \033[0m%n", presence.getFrom());
+                        System.out.println(util.cursorSave());
+                    }
+                    case unsubscribed -> {
+                        System.out.printf("\033[M\033[1;33m** %s is unsubscribed to your roster \033[0m%n", presence.getFrom());
+                        System.out.println(util.cursorSave());
+                    }
                     case available -> {
                         if (presence.getStatus() != null)
-                            System.out.printf("\n\033[1;33m** %s has updated its status to %s \033[0m", presence.getFrom(), presence.getStatus());
+                            System.out.printf("\033[1;33m** %s has updated its status to %s \033[0m%n", presence.getFrom(), presence.getStatus());
                         else
-                            System.out.printf(GREEN + "\n** %s is available  \033[0m", presence.getFrom());
+                            System.out.printf(util.SG + "** %s is available  \033[0m%n", presence.getFrom());
+
+                        System.out.println(util.cursorSave());
                     }
                     case unavailable -> {
                         if (presence.getStatus() != null)
-                            System.out.printf("\n\033[1;33m** %s has updated its status to %s \033[0m", presence.getFrom(), presence.getStatus());
+                            System.out.printf("\033[1;33m** %s has updated its status to %s \033[0m%n", presence.getFrom(), presence.getStatus());
                         else
-                            System.out.printf(RED + "\n** %s is unavailable \033[0m", presence.getFrom());
+                            System.out.printf(util.SR + "** %s is unavailable \033[0m%n", presence.getFrom());
+
+                        System.out.println(util.cursorSave());
                     }
                     default -> System.out.printf("%n%s",presence);
                 }
+                System.out.print(util.cursorTo(22,1));
             }
 
         };
@@ -122,10 +117,13 @@ public class Connection {
             Message message = (Message) stanza;
             if (message.getBody() != null){
                 LocalDateTime now = LocalDateTime.now();
+                System.out.print(util.cursorRestore());
                 if (message.getFrom().toString().contains("conference")){
-                    System.out.printf("\n\033[0;93m[" + formatter.format(now) + "]\033[1;94m %s: \033[0;34m%s \033[0m", message.getFrom(), message.getBody());
+                    System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;94m %s: \033[0;34m%s \033[0m%n", message.getFrom(), message.getBody());
                 }else
-                    System.out.printf("\n\033[0;93m[" + formatter.format(now) + "]\033[1;95m %s: \033[0;37m%s \033[0m", message.getFrom().asBareJid(), message.getBody());
+                    System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;95m %s: \033[0;37m%s \033[0m%n", message.getFrom().asBareJid(), message.getBody());
+
+                System.out.print(util.cursorTo(22,1));
             }
         };
 

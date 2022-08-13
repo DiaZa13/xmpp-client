@@ -63,41 +63,49 @@ public class Contacts {
                     roster.isSubscribedToMyPresence(JidCreate.bareFrom(user)));
 
         } catch (XmppStringprepException e) {
-            throw new RuntimeException(e);
+            return "error";
         }
 
     }
 
-    public void handleSubscription(AbstractXMPPConnection connection, String response, Jid to){
+    public boolean declineSubscription(AbstractXMPPConnection connection, Jid to){
+        Presence presence_response = connection.getStanzaFactory()
+                .buildPresenceStanza()
+                .to(to)
+                .ofType(Presence.Type.unsubscribed)
+                .build();
+
         try {
-            if (response.equalsIgnoreCase("2")){
-                System.out.println("**\n\033[0;37m Rejected request \033[0m");
-                Presence presence_response = connection.getStanzaFactory()
-                        .buildPresenceStanza()
-                        .to(JidCreate.from(to))
-                        .ofType(Presence.Type.unsubscribed)
-                        .build();
-
-                connection.sendStanza(presence_response);
-            } else {
-                System.out.println("**\n\033[0;37mAccepted request \033[0m");
-                Presence presence_response = connection.getStanzaFactory()
-                        .buildPresenceStanza()
-                        .to(to)
-                        .ofType(Presence.Type.subscribed)
-                        .build();
-
-                Presence request = connection.getStanzaFactory()
-                        .buildPresenceStanza()
-                        .to(to)
-                        .ofType(Presence.Type.subscribe)
-                        .build();
-
-                connection.sendStanza(presence_response);
-                connection.sendStanza(request);
-            }
-        }catch (SmackException.NotConnectedException | InterruptedException | XmppStringprepException e) {
-                throw new RuntimeException(e);
-            }
+            connection.sendStanza(presence_response);
+            return true;
+        } catch (SmackException.NotConnectedException | InterruptedException e) {
+            return false;
+        }
     }
+
+    public boolean acceptSubscription(AbstractXMPPConnection connection, Jid to){
+        Presence presence_response = connection.getStanzaFactory()
+                .buildPresenceStanza()
+                .to(to)
+                .ofType(Presence.Type.subscribed)
+                .build();
+
+        // If the other user is not subscribed to the user roster it sends a request
+        Presence request = connection.getStanzaFactory()
+                .buildPresenceStanza()
+                .to(to)
+                .ofType(Presence.Type.subscribe)
+                .build();
+
+        try {
+            connection.sendStanza(presence_response);
+            // TODO Validate if the user is already on the roster
+            connection.sendStanza(request);
+            return true;
+        } catch (SmackException.NotConnectedException | InterruptedException e) {
+            return false;
+        }
+
+    }
+
 }

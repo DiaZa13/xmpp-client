@@ -28,7 +28,6 @@ public class Authentication{
                 connection.login(user.username(), user.password());
                 return true;
             } catch (XMPPException | SmackException | InterruptedException | IOException e) {
-                e.printStackTrace();
                 return false;
             }
         }
@@ -36,7 +35,7 @@ public class Authentication{
         return false;
     }
 
-    public void singUp(User user, String email){
+    public boolean singUp(User user, String email){
 
         Map<String, String> attributes = new HashMap<String, String>();
         // establish the rest of the attributes
@@ -47,11 +46,12 @@ public class Authentication{
                 // this allows to create an account over an insecure connection
                 accountManager.sensitiveOperationOverInsecureConnection(true);
                 accountManager.createAccount(Localpart.from(user.username()), user.password(), attributes);
-
+                return true;
             } catch (XMPPException | SmackException | InterruptedException | IOException e) {
-                throw new RuntimeException(e);
+                return false;
             }
         }
+        return false;
     }
 
     public void deleteAccount(){
