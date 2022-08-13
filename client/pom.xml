@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.zclient</groupId>
-    <artifactId>client</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>xmmp-client</artifactId>
+    <version>1.0</version>
 
     <properties>
         <maven.compiler.source>18</maven.compiler.source>
@@ -17,15 +17,34 @@
     <build>
         <plugins>
             <plugin>
-                <!-- Build an executable JAR -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/lib</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>2.4</version>
                 <configuration>
+                    <outputDirectory>target</outputDirectory>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <!-- here we specify that we want to use the main method within the App class -->
+                            <classpathPrefix>lib</classpathPrefix>
                             <mainClass>org.zclient.Main</mainClass>
                         </manifest>
                     </archive>
@@ -33,7 +52,6 @@
             </plugin>
         </plugins>
     </build>
-
 
     <dependencies>
         <dependency>
