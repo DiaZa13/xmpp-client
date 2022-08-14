@@ -1,5 +1,11 @@
 package org.zclient;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class util {
 
     // ANSI Terminal codes
@@ -50,4 +56,34 @@ public class util {
     public static final String SR = "\033[1;38;5;52m";
 
 
+    public List<Integer> readCurrentPosition() {
+        List<Integer> position = Arrays.asList(22, 1);
+    try {
+        System.out.print(util.cursorTo(23,1));
+        System.out.print("\033[6n");
+
+        String result = "";
+        int character;
+
+        do {
+            character = System.in.read();
+            if (character == 27) {
+                result += "^";
+            } else {
+                result += (char) character;
+            }
+        } while (character != 82); // 'R'
+
+        Pattern pattern = Pattern.compile("\\^\\[(\\d+);(\\d+)R");
+        Matcher matcher = pattern.matcher(result);
+
+        if (matcher.matches()) {
+            position.set(0, Integer.valueOf(matcher.group(2)));
+            position.set(1, Integer.valueOf(matcher.group(1)));
+        }
+    } catch (IOException e) {
+           return position;
+        }
+        return position;
+    }
 }

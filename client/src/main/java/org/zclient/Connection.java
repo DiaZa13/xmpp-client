@@ -7,10 +7,8 @@ import org.jivesoftware.smack.filter.StanzaFilter;
 import org.jivesoftware.smack.filter.StanzaTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
-import org.minidns.record.A;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -21,6 +19,7 @@ public class Connection {
     private final String domain;
     private AbstractXMPPConnection stream;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private util pos = new util();
 
     Scanner read = new Scanner(System.in);
 
@@ -59,20 +58,20 @@ public class Connection {
                     System.out.printf("\033[1;33m** %s wants to subscribe to your roster \033[0m%n", presence.getFrom());
                     System.out.println(util.cursorSave());
                     System.out.print(util.cursorTo(22, 1));
-                    System.out.println("\033[0;37mDo you want to accept the subscription? [Y/n] ");
+                    System.out.print("\033[0;37mDo you want to accept the subscription? [Y/n] ");
                     String response = read.next();
                     // Handle request subscription
                     if ("n".equalsIgnoreCase(response)) {
                         contacts.declineSubscription(stream, presence.getFrom());
 
                         System.out.print(util.cursorRestore());
-                        System.out.println("\033[0;37m**Accepted request \033[0m");
+                        System.out.println("\033[0;37m**Rejected request \033[0m");
                         System.out.println(util.cursorSave());
                     } else {
                         contacts.acceptSubscription(stream, presence.getFrom());
 
                         System.out.print(util.cursorRestore());
-                        System.out.println("\033[0;37m**Rejected request \033[0m");
+                        System.out.println("\033[0;37m**Accepted request \033[0m");
                         System.out.println(util.cursorSave());
                     }
                 }
@@ -81,7 +80,7 @@ public class Connection {
                     System.out.println(util.cursorSave());
                 }
                 case unsubscribed -> {
-                    System.out.printf("\033[M\033[1;33m** %s is unsubscribed to your roster \033[0m%n", presence.getFrom());
+                    System.out.printf("\033[1;33m** %s is unsubscribed to your roster \033[0m%n", presence.getFrom());
                     System.out.println(util.cursorSave());
                 }
                 case available -> {
@@ -107,7 +106,6 @@ public class Connection {
     }
 
     public void messageListener(Message message){
-        System.out.println("\033[6n");
         if (message.getBody() != null){
             LocalDateTime now = LocalDateTime.now();
             System.out.print(util.cursorRestore());
@@ -119,6 +117,7 @@ public class Connection {
                 System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;95m %s: \033[0;37m%s \033[0m%n", message.getFrom().asBareJid(), message.getBody());
                 System.out.println(util.cursorSave());
             }
+            // TODO ver si puedo regresarlo a la posicion donde estaba escribiendo
             System.out.print(util.cursorTo(22,1));
         }
     }
@@ -139,8 +138,12 @@ public class Connection {
                 new Thread(() -> messageListener(message)).start();
             }else {
                 Presence presence = (Presence) stanza;
-                new Thread(() -> presenceListener(contacts, presence)).start();
-                // TODO otro thread para cuando se espera por la solicitud de amistad
+                if (presence.getType().equals(Presence.Type.subscribe)){
+                    Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
+                    new Thread(() -> presenceListener(contacts, presence)).start();
+                    Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+                }else
+                    new Thread(() -> presenceListener(contacts, presence)).start();
             }
 
         };

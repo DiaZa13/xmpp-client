@@ -46,20 +46,17 @@ public class Main {
                         // Cleaning the console to let the user know that its log in was successful
                         System.out.print(util.clearScreen());
                         System.out.flush();
-                        System.out.printf("%s Z-Network                                                                    [XMPP-Client] [%sonline\033[0m%s]  %n\033[0m", util.BKG, util.BG, util.BKG);
+                        System.out.printf("%s Z-Network                                                              [XMPP-Client] [%sonline\033[0m%s]  %n\033[0m", util.BKG, util.BG, util.BKG);
                         // Saves the cursor position
                         System.out.print(util.cursorSave());
                         // Moving the cursor to the bottom
-                        System.out.printf(util.cursorTo(21,1) + util.BKG + "[" + now.format(DateTimeFormatter.ofPattern("HH:mm:ss"))  + "] %s                                                                  [-help]  %n\033[0m",connection.getStream().getUser().asBareJid());
+                        System.out.printf(util.cursorTo(21,1) + util.BKG + "[" + now.format(DateTimeFormatter.ofPattern("HH:mm:ss"))  + "] %s                                                          [-help]  %n\033[0m",connection.getStream().getUser().asBareJid());
                         // Defines the scroll window
                         System.out.print(util.scrollSet(2,20));
 
                         Contacts contacts = new Contacts(connection.getStream());
                         Communication communication = new Communication(connection.getStream());
-                        // Listen for messages
-//                        connection.messageListener();
-//                        // Listen for presences
-//                        connection.presenceListener(contacts);
+                        // Listen for income messages and presences
                         connection.addListener(contacts);
 
                         do{
