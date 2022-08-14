@@ -15,7 +15,7 @@ import java.util.Collection;
 
 public class Contacts {
 
-    private Roster roster;
+    private final Roster roster;
 
     public Contacts(AbstractXMPPConnection connection){
         roster = Roster.getInstanceFor(connection);
@@ -54,7 +54,7 @@ public class Contacts {
         try {
             RosterEntry information = roster.getEntry(JidCreate.bareFrom(user));
             Presence presence = roster.getPresence(JidCreate.bareFrom(user));
-            return String.format("\nUser JID: %s%n\tName: %s%n\tPresence: %s%n\tStatus: %s%n\tShow: %s%n\tContact: %s" ,
+            return String.format("User JID: %s%n\tName: %s%n\tPresence: %s%n\tStatus: %s%n\tShow: %s%n\tContact: %s" ,
                     information.getJid(),
                     information.getName() != null?information.getName():"-",
                     presence.getType(),

@@ -132,10 +132,10 @@ public class Main {
 
                             } else if (auth_opt.equals("-logout")) {
                                 connection.close();
-                                System.out.println(util.scrollScreen());
+
                             }else {
                                 System.out.println("Invalid option. Type -help to see available options...");
-                                System.out.println(util.cursorSave());
+
                             }
                         }while (!"-logout".equals(auth_opt));
                     }
