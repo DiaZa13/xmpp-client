@@ -61,6 +61,7 @@ public class util {
     try {
         System.out.print(util.cursorTo(23,1));
         System.out.print("\033[6n");
+        System.out.println(cursorRestore());
 
         String result = "";
         int character;

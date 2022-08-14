@@ -2,6 +2,8 @@ package org.zclient;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -46,7 +48,7 @@ public class Main {
                         // Cleaning the console to let the user know that its log in was successful
                         System.out.print(util.clearScreen());
                         System.out.flush();
-                        System.out.printf("%s Z-Network                                                              [XMPP-Client] [%sonline\033[0m%s]  %n\033[0m", util.BKG, util.BG, util.BKG);
+                        System.out.printf("%s Z-Network                                                               [XMPP-Client] [%sonline\033[0m%s]  %n\033[0m", util.BKG, util.BG, util.BKG);
                         // Saves the cursor position
                         System.out.print(util.cursorSave());
                         // Moving the cursor to the bottom
@@ -60,7 +62,7 @@ public class Main {
                         connection.addListener(contacts);
 
                         do{
-                            System.out.print(util.cursorTo(22,1) + "\033[0K");
+                            System.out.print(util.cursorTo(22,1) + "\033[0J");
                             auth_opt = read.nextLine();
                             // Restore the cursor to the last saved position
                             System.out.print(util.cursorRestore());

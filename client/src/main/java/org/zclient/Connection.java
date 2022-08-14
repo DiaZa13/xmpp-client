@@ -54,24 +54,26 @@ public class Connection {
             System.out.print(util.cursorRestore());
             switch (presence.getType()) {
                 case subscribe -> {
+
                     // Request a subscription
                     System.out.printf("\033[1;33m** %s wants to subscribe to your roster \033[0m%n", presence.getFrom());
                     System.out.println(util.cursorSave());
                     System.out.print(util.cursorTo(22, 1));
                     System.out.print("\033[0;37mDo you want to accept the subscription? [Y/n] ");
+                    // TODO to tell the main thread to wait for this thread ahahahah
                     String response = read.next();
                     // Handle request subscription
                     if ("n".equalsIgnoreCase(response)) {
                         contacts.declineSubscription(stream, presence.getFrom());
 
                         System.out.print(util.cursorRestore());
-                        System.out.println("\033[0;37m**Rejected request \033[0m");
+                        System.out.println("\033[0;37m** Rejected request \033[0m");
                         System.out.println(util.cursorSave());
                     } else {
                         contacts.acceptSubscription(stream, presence.getFrom());
 
                         System.out.print(util.cursorRestore());
-                        System.out.println("\033[0;37m**Accepted request \033[0m");
+                        System.out.println("\033[0;37m** Accepted request \033[0m");
                         System.out.println(util.cursorSave());
                     }
                 }
@@ -117,6 +119,7 @@ public class Connection {
                 System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;95m %s: \033[0;37m%s \033[0m%n", message.getFrom().asBareJid(), message.getBody());
                 System.out.println(util.cursorSave());
             }
+
             // TODO ver si puedo regresarlo a la posicion donde estaba escribiendo
             System.out.print(util.cursorTo(22,1));
         }
@@ -139,9 +142,8 @@ public class Connection {
             }else {
                 Presence presence = (Presence) stanza;
                 if (presence.getType().equals(Presence.Type.subscribe)){
-                    Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
                     new Thread(() -> presenceListener(contacts, presence)).start();
-                    Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+                    Thread.currentThread().join();
                 }else
                     new Thread(() -> presenceListener(contacts, presence)).start();
             }
@@ -151,7 +153,7 @@ public class Connection {
         stream.addStanzaListener(listener, stanzaFilter);
     }
 
-    // maybe i have to remove the listeners
+
     public void close(){
         stream.disconnect();
     }
