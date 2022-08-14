@@ -47,7 +47,7 @@ public class util {
 
     // Server response colors
     public static final String SG = "\033[1;38;5;22m";
-    public static final String SR = "\033[1;38;5;88m";
+    public static final String SR = "\033[1;38;5;52m";
 
 
 }
