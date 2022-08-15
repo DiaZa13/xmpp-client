@@ -60,6 +60,7 @@ public class Main {
                         Communication communication = new Communication(connection.getStream());
                         // Listen for income messages and presences
                         connection.addListener(contacts);
+                        communication.receiveFile("/files");
 
                         do{
                             System.out.print(util.cursorTo(22,1) + "\033[0J");
@@ -70,7 +71,8 @@ public class Main {
                                 System.out.println("\t\033[0;37m-users                            show users/contacts");
                                 System.out.println("\t-add<email>                       add a user to contacts");
                                 System.out.println("\t-details<email>                   details of a user");
-                                System.out.println("\t-msg<user/group jid, msg/file>    sends a message o file to a group or user");
+                                System.out.println("\t-msg<user/group jid, msg/file>    sends a message  to a group or user");
+                                System.out.println("\t-file<user jid, file path>        sends a file to the specified user");
                                 System.out.println("\t-join<room@service/nickname>      join a chat room");
                                 System.out.println("\t-presence<new presence>           edit user profile");
                                 System.out.println("\t-delete                           delete the actual logged account");
@@ -109,6 +111,16 @@ public class Main {
 
                                 // TODO send files
 
+                            } else if (auth_opt.startsWith("-file")) {
+                                String directoryName = System.getProperty("user.dir");
+                                System.out.println("Current Working Directory is = " + directoryName);
+                                data = auth_opt.substring(6, auth_opt.length()-1);
+                                String[] parts = data.split(",");
+                                to_user = parts[0];
+                                msg = parts[1].trim();
+
+                                communication.sendFile(to_user, msg);
+
                             } else if (auth_opt.startsWith("-join")) {
                                 String group = auth_opt.substring(6, auth_opt.length()-1);
 
@@ -132,6 +144,7 @@ public class Main {
 
                             } else if (auth_opt.equals("-logout")) {
                                 connection.close();
+                                System.out.println(util.scrollScreen());
 
                             }else {
                                 System.out.println("Invalid option. Type -help to see available options...");

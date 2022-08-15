@@ -6,17 +6,25 @@ import org.jivesoftware.smack.chat2.Chat;
 import org.jivesoftware.smack.chat2.ChatManager;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smackx.filetransfer.*;
+import org.jxmpp.jid.EntityFullJid;
+import org.jxmpp.jid.EntityJid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
+
+import java.io.File;
+import java.io.IOException;
 
 public class Communication {
 
     private final ChatManager chatManager;
+    private FileTransferManager fileManager;
     private String income_message;
     private final AbstractXMPPConnection connection;
 
     public Communication(AbstractXMPPConnection connection){
         chatManager = ChatManager.getInstanceFor(connection);
+        fileManager = FileTransferManager.getInstanceFor(connection);
         this.connection = connection;
     }
 
@@ -67,5 +75,44 @@ public class Communication {
         } catch (XmppStringprepException | SmackException.NotConnectedException | InterruptedException e) {
             return false;
         }
+    }
+
+    public void sendFile(String jid, String path){
+
+        try {
+            EntityFullJid to_jid = JidCreate.entityFullFrom(jid);
+            // stream negotiation based on XEP-0095
+            OutgoingFileTransfer stream = fileManager.createOutgoingFileTransfer(to_jid);
+            // when the stream negotiation is done know it can transfer files
+            File file = new File(path);
+            System.out.println(file);
+            stream.sendFile(file, "file");
+            System.out.println(stream.getProgress());
+            System.out.println(stream.getStatus());
+            System.out.println("Que ha pasado....");
+        } catch (XmppStringprepException | SmackException e) {
+            System.out.println(util.cursorTo(23,1));
+            e.printStackTrace();
+            connection.disconnect();
+        }
+
+    }
+
+    public void receiveFile(String path){
+        FileTransferListener listener = new FileTransferListener() {
+            @Override
+            public void fileTransferRequest(FileTransferRequest fileTransferRequest) {
+                System.out.println("Te han enviado un archivo");
+                // path to save the receipt file
+                File file = new File(path, fileTransferRequest.getFileName());
+                try {
+                    fileTransferRequest.accept().receiveFile(file);
+                } catch (SmackException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+
+        fileManager.addFileTransferListener(listener);
     }
 }
