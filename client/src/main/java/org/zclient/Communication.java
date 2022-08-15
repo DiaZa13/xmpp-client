@@ -15,6 +15,7 @@ import org.jxmpp.stringprep.XmppStringprepException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 
 public class Communication {
 
@@ -91,10 +92,12 @@ public class Communication {
             if (!file.canRead()) return false;
 
             stream.sendFile(file, "file");
-            while (!stream.isDone()){
+
+            while(!stream.isDone()){
                 System.out.println(stream.getProgress());
                 System.out.println(stream.getStatus());
             }
+
             return true;
         } catch (XmppStringprepException | SmackException e) {
             return false;
@@ -108,11 +111,24 @@ public class Communication {
             public void fileTransferRequest(FileTransferRequest fileTransferRequest) {
                 System.out.println("Te han enviado un archivo");
                 // path to save the receipt the file
-                File file = new File(path, fileTransferRequest.getFileName());
+                String directoryName = System.getProperty("user.dir");
+                File file = new File(directoryName, path);
+                System.out.println(file.getPath());
+                System.out.println(file.isDirectory());
+                System.out.println(file.getAbsolutePath());
                 try {
+                    System.out.println(fileTransferRequest.getFileName());
                     fileTransferRequest.accept().receiveFile(file);
                 } catch (SmackException | IOException e) {
-                    throw new RuntimeException(e);
+                    System.out.println("Ocurrió un error");
+                    System.out.println(file.getPath());
+                    System.out.println(file.isDirectory());
+                    System.out.println(file.getAbsolutePath());
+                    try {
+                        fileTransferRequest.reject();
+                    } catch (SmackException.NotConnectedException | InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         };

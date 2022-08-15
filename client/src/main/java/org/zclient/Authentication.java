@@ -28,15 +28,6 @@ public class Authentication{
         if (connection.isConnected()){
             try {
                 connection.login(user.username(), user.password());
-
-                Presence presence = connection.getStanzaFactory()
-                        .buildPresenceStanza()
-                        .ofType(Presence.Type.available)
-                        .build();
-
-                connection.sendStanza(presence);
-                System.out.println("Me no entender nada xd");
-
                 return true;
             } catch (XMPPException | SmackException | InterruptedException | IOException e) {
                 return false;

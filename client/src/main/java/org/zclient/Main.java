@@ -2,8 +2,6 @@ package org.zclient;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -60,7 +58,7 @@ public class Main {
                         connection.addListener(contacts);
                         // Saves the actual working directory
                         String directoryName = System.getProperty("user.dir");
-                        communication.receiveFile("client/src/files");
+                        communication.receiveFile("files");
 
                         do{
                             System.out.print(util.cursorTo(22,1) + "\033[0J");
