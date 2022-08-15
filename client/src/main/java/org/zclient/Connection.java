@@ -32,6 +32,7 @@ public class Connection {
                     .setHost(domain)
                     // sends presence to let know the server that is available
                     .setSendPresence(true)
+                    .enableDefaultDebugger()
                     .setSecurityMode(ConnectionConfiguration.SecurityMode.disabled)
                     .build();
 

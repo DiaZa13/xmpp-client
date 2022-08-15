@@ -58,7 +58,7 @@ public class Main {
                         connection.addListener(contacts);
                         // Saves the actual working directory
                         String directoryName = System.getProperty("user.dir");
-                        communication.receiveFile("files");
+                        communication.receiveFile("/files");
 
                         do{
                             System.out.print(util.cursorTo(22,1) + "\033[0J");
