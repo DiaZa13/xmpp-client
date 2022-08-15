@@ -6,6 +6,7 @@ import org.jivesoftware.smack.chat2.Chat;
 import org.jivesoftware.smack.chat2.ChatManager;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smackx.filetransfer.*;
 import org.jxmpp.jid.EntityFullJid;
 import org.jxmpp.jid.EntityJid;
@@ -18,8 +19,8 @@ import java.io.IOException;
 public class Communication {
 
     private final ChatManager chatManager;
-    private FileTransferManager fileManager;
-    private String income_message;
+    private final FileTransferManager fileManager;
+
     private final AbstractXMPPConnection connection;
 
     public Communication(AbstractXMPPConnection connection){
@@ -77,23 +78,26 @@ public class Communication {
         }
     }
 
-    public void sendFile(String jid, String path){
+    public boolean sendFile(String jid, String path){
 
+        System.out.print(util.cursorRestore());
         try {
             EntityFullJid to_jid = JidCreate.entityFullFrom(jid);
             // stream negotiation based on XEP-0095
             OutgoingFileTransfer stream = fileManager.createOutgoingFileTransfer(to_jid);
             // when the stream negotiation is done know it can transfer files
             File file = new File(path);
-            System.out.println(file);
+            // It has an error with the file
+            if (!file.canRead()) return false;
+
             stream.sendFile(file, "file");
-            System.out.println(stream.getProgress());
-            System.out.println(stream.getStatus());
-            System.out.println("Que ha pasado....");
+            while (!stream.isDone()){
+                System.out.println(stream.getProgress());
+                System.out.println(stream.getStatus());
+            }
+            return true;
         } catch (XmppStringprepException | SmackException e) {
-            System.out.println(util.cursorTo(23,1));
-            e.printStackTrace();
-            connection.disconnect();
+            return false;
         }
 
     }
@@ -103,7 +107,7 @@ public class Communication {
             @Override
             public void fileTransferRequest(FileTransferRequest fileTransferRequest) {
                 System.out.println("Te han enviado un archivo");
-                // path to save the receipt file
+                // path to save the receipt the file
                 File file = new File(path, fileTransferRequest.getFileName());
                 try {
                     fileTransferRequest.accept().receiveFile(file);

@@ -16,8 +16,6 @@ public class Main {
         String username, password, email, to_user, msg, data = "";
         String option, auth_opt;
 
-        // revisar sino es mejor conectarme desde el constructor
-
         do {
             System.out.print(util.clearScreen());
             System.out.flush();
@@ -60,7 +58,9 @@ public class Main {
                         Communication communication = new Communication(connection.getStream());
                         // Listen for income messages and presences
                         connection.addListener(contacts);
-                        communication.receiveFile("/files");
+                        // Saves the actual working directory
+                        String directoryName = System.getProperty("user.dir");
+                        communication.receiveFile("client/src/files");
 
                         do{
                             System.out.print(util.cursorTo(22,1) + "\033[0J");
@@ -73,15 +73,20 @@ public class Main {
                                 System.out.println("\t-details<email>                   details of a user");
                                 System.out.println("\t-msg<user/group jid, msg/file>    sends a message  to a group or user");
                                 System.out.println("\t-file<user jid, file path>        sends a file to the specified user");
+                                System.out.println("\t-wk                               prints the current working directory");
                                 System.out.println("\t-join<room@service/nickname>      join a chat room");
-                                System.out.println("\t-presence<new presence>           edit user profile");
+                                System.out.println("\t-presence<new presence>           edit the message presence");
+                                System.out.println("\t-show<new presence>               change the user show state");
                                 System.out.println("\t-delete                           delete the actual logged account");
                                 System.out.println("\t-logout                           logout \033[0m");
 
-                                System.out.println(util.cursorSave());
+                                System.out.print(util.cursorSave());
+
                             } else if (auth_opt.startsWith("-users")) {
                                 contacts.getContacts();
-                                System.out.println(util.cursorSave());
+
+                                System.out.print(util.cursorSave());
+
                             } else if (auth_opt.startsWith("-add")) {
                                 email = auth_opt.substring(5,auth_opt.length()-1);
 
@@ -90,16 +95,18 @@ public class Main {
                                 }else
                                     System.out.println("\033[0;37m**It was an error sending the request\033[0m");
 
-                                System.out.println(util.cursorSave());
+                                System.out.print(util.cursorSave());
+
                             } else if (auth_opt.startsWith("-details")) {
                                 username = auth_opt.substring(9,auth_opt.length()-1);
                                 String result = contacts.contactDetails(username);
                                 if (result.equals("error")){
-                                    System.out.printf("\033[0;37m**It was an error obtaining the details for %s \033[0m%n", username);
+                                    System.out.printf("\033[0;37m**It was an error while obtaining the details for %s \033[0m%n", username);
                                 }else{
                                     System.out.println(result);
                                 }
-                                System.out.println(util.cursorSave());
+                                System.out.print(util.cursorSave());
+
                             } else if (auth_opt.startsWith("-msg")) {
                                 data = auth_opt.substring(5, auth_opt.length()-1);
                                 String[] parts = data.split(",");
@@ -109,17 +116,24 @@ public class Main {
                                 if (to_user.contains("conference")) communication.groupMessage(to_user, msg);
                                 else communication.directMessage(to_user, msg);
 
-                                // TODO send files
+                                // TODO poner los mensajes que env'ia en consola
 
                             } else if (auth_opt.startsWith("-file")) {
-                                String directoryName = System.getProperty("user.dir");
-                                System.out.println("Current Working Directory is = " + directoryName);
                                 data = auth_opt.substring(6, auth_opt.length()-1);
                                 String[] parts = data.split(",");
                                 to_user = parts[0];
                                 msg = parts[1].trim();
 
-                                communication.sendFile(to_user, msg);
+                                if(communication.sendFile(to_user, msg))
+                                    System.out.println("\033[0;37m**The file was sent successfully %s\033[0m%n");
+                                else
+                                    System.out.println("\033[0;37m**It was an error while trying to send the file\033[0m");
+
+                                System.out.print(util.cursorSave());
+
+                            } else if (auth_opt.startsWith("-wk")) {
+                                System.out.println("Current working directory is = " + directoryName);
+                                System.out.print(util.cursorSave());
 
                             } else if (auth_opt.startsWith("-join")) {
                                 String group = auth_opt.substring(6, auth_opt.length()-1);
@@ -128,7 +142,9 @@ public class Main {
                                     System.out.printf("\033[0;37m**Successfully joined the group %s\033[0m%n", group);
                                 }else
                                     System.out.println("\033[0;37m**It was an error while trying to join the group\033[0m");
-                                System.out.println(util.cursorSave());
+
+                                System.out.print(util.cursorSave());
+
                             } else if (auth_opt.startsWith("-presence")) {
                                 data = auth_opt.substring(10,auth_opt.length()-1);
 
@@ -136,10 +152,13 @@ public class Main {
                                     System.out.printf("\033[0;37m** Presence message successfully updated to %s\033[0m%n", data);
                                 }else
                                     System.out.println("\033[0;37m** It was an error while trying to update the presence \033[0m");
-                                System.out.println(util.cursorSave());
+
+                                System.out.print(util.cursorSave());
+
                             } else if (auth_opt.startsWith("-delete")) {
                                 authentication.deleteAccount();
                                 auth_opt = "-logout";
+
                                 System.out.println(util.scrollScreen());
 
                             } else if (auth_opt.equals("-logout")) {
@@ -148,7 +167,7 @@ public class Main {
 
                             }else {
                                 System.out.println("Invalid option. Type -help to see available options...");
-                                System.out.println(util.cursorSave());
+                                System.out.print(util.cursorSave());
                             }
                         }while (!"-logout".equals(auth_opt));
                     }

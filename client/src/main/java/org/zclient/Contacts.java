@@ -23,10 +23,6 @@ public class Contacts {
 
     }
 
-    public void getUsers(){
-
-    }
-
     public void getContacts(){
         Collection<RosterEntry> entries = roster.getEntries();
         for (RosterEntry entry : entries) {

@@ -31,7 +31,7 @@ public class Connection {
                     .setXmppDomain(domain)
                     .setHost(domain)
                     // sends presence to let know the server that is available
-                    .setSendPresence(false)
+                    .setSendPresence(true)
                     .setSecurityMode(ConnectionConfiguration.SecurityMode.disabled)
                     .build();
 
@@ -47,32 +47,40 @@ public class Connection {
         return stream;
     }
 
-    public void presenceListener(Contacts contacts, Presence presence){
+    public void handlerSubscription(Contacts contacts, Presence presence){
+        System.out.print(util.cursorRestore());
+        System.out.printf("\033[1;33m** %s wants to subscribe to your roster \033[0m%n", presence.getFrom());
+        System.out.print(util.cursorSave());
+        System.out.print(util.cursorTo(22, 1));
+        System.out.print("\033[0;37mDo you want to accept the subscription? [Y/n] ");
+        // the readers got confused i think idk
+        String response = read.next();
+        try {
+            // Espera hasta obtener la respuesta
+            Thread.currentThread().wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        // Handle request subscription
+        if ("n".equalsIgnoreCase(response)) {
+            contacts.declineSubscription(stream, presence.getFrom());
+
+            System.out.print(util.cursorRestore());
+            System.out.println("\033[0;37m** Rejected request \033[0m");
+            System.out.print(util.cursorSave());
+        } else {
+            contacts.acceptSubscription(stream, presence.getFrom());
+
+            System.out.print(util.cursorRestore());
+            System.out.println("\033[0;37m** Accepted request \033[0m");
+            System.out.print(util.cursorSave());
+        }
+        Thread.currentThread().notifyAll();
+    }
+
+    public void presenceListener(Presence presence){
         System.out.print(util.cursorRestore());
         switch (presence.getType()) {
-            case subscribe -> {
-                // Request a subscription
-                System.out.printf("\033[1;33m** %s wants to subscribe to your roster \033[0m%n", presence.getFrom());
-                System.out.print(util.cursorSave());
-                System.out.print(util.cursorTo(22, 1));
-                System.out.print("\033[0;37mDo you want to accept the subscription? [Y/n] ");
-                // the readers got confused i think idk
-                String response = read.next();
-                // Handle request subscription
-                if ("n".equalsIgnoreCase(response)) {
-                    contacts.declineSubscription(stream, presence.getFrom());
-
-                    System.out.print(util.cursorRestore());
-                    System.out.println("\033[0;37m** Rejected request \033[0m");
-                    System.out.print(util.cursorSave());
-                } else {
-                    contacts.acceptSubscription(stream, presence.getFrom());
-
-                    System.out.print(util.cursorRestore());
-                    System.out.println("\033[0;37m** Accepted request \033[0m");
-                    System.out.print(util.cursorSave());
-                }
-            }
             case subscribed -> {
                 System.out.printf("\033[1;33m** %s is subscribed to your roster \033[0m%n", presence.getFrom());
                 System.out.print(util.cursorSave());
@@ -147,10 +155,10 @@ public class Connection {
                     if (presence.getType().equals(Presence.Type.subscribe)){
                         // If the presence is a request to subscribe to the user roster
                         // then it creates a new thread to handle it
-                        new Thread(() -> presenceListener(contacts, presence)).start();
-                        Thread.currentThread().join();
-                    }else
-                        new Thread(() -> presenceListener(contacts, presence)).start();
+                        new Thread(() -> handlerSubscription(contacts, presence)).start();
+                    }else {
+                        new Thread(() -> presenceListener(presence)).start();
+                    }
                 }
             }
 
