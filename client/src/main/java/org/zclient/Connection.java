@@ -9,7 +9,6 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
-import org.jxmpp.jid.impl.JidCreate;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -20,8 +19,6 @@ public class Connection {
     private final String domain;
     private AbstractXMPPConnection stream;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-    private Presence temp_presence = null;
-
     Scanner read = new Scanner(System.in);
 
     public Connection(String domain){
@@ -91,10 +88,10 @@ public class Connection {
                     String[] data = presence.getStanzaId().split("-");
                     try{
                         int id = Integer.parseInt(data[1]);
-                        if (id == 1)
-                            System.out.printf(Thread.currentThread().getId() + util.SG + "** %s is available  \033[0m%n", presence.getFrom());
+                        if (id == 2)
+                            System.out.printf(util.SG + "** %s is available  \033[0m%n", presence.getFrom());
                     }catch (Exception e){
-                        System.out.printf(Thread.currentThread().getId() + util.SG + "** %s is available  \033[0m%n", presence.getFrom());
+                        System.out.printf(util.SG + "** %s is available  \033[0m%n", presence.getFrom());
                     }
                 }
                 System.out.print(util.cursorSave());
@@ -152,8 +149,8 @@ public class Connection {
                         // then it creates a new thread to handle it
                         new Thread(() -> presenceListener(contacts, presence)).start();
                         Thread.currentThread().join();
-                    } else
-                        presenceListener(contacts, presence);
+                    }else
+                        new Thread(() -> presenceListener(contacts, presence)).start();
                 }
             }
 
@@ -161,7 +158,6 @@ public class Connection {
 
         stream.addStanzaListener(listener, stanzaFilter);
     }
-
 
     public void close(){
         stream.disconnect();
