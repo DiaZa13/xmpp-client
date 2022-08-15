@@ -9,6 +9,7 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
+import org.jxmpp.jid.impl.JidCreate;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -19,7 +20,7 @@ public class Connection {
     private final String domain;
     private AbstractXMPPConnection stream;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-    private util pos = new util();
+    private Presence temp_presence = null;
 
     Scanner read = new Scanner(System.in);
 
@@ -32,8 +33,8 @@ public class Connection {
             XMPPTCPConnectionConfiguration configuration = XMPPTCPConnectionConfiguration.builder()
                     .setXmppDomain(domain)
                     .setHost(domain)
-                    // this tells the server that is ready to receive data
-                    .setSendPresence(true)
+                    // sends presence to let know the server that is available
+                    .setSendPresence(false)
                     .setSecurityMode(ConnectionConfiguration.SecurityMode.disabled)
                     .build();
 
@@ -51,8 +52,6 @@ public class Connection {
 
     public void presenceListener(Contacts contacts, Presence presence){
         System.out.print(util.cursorRestore());
-        System.out.println(presence);
-        System.out.print(util.cursorSave());
         switch (presence.getType()) {
             case subscribe -> {
                 // Request a subscription
@@ -60,7 +59,7 @@ public class Connection {
                 System.out.print(util.cursorSave());
                 System.out.print(util.cursorTo(22, 1));
                 System.out.print("\033[0;37mDo you want to accept the subscription? [Y/n] ");
-                // TODO to tell the main thread to wait for this thread ahahahah
+                // the readers got confused i think idk
                 String response = read.next();
                 // Handle request subscription
                 if ("n".equalsIgnoreCase(response)) {
@@ -89,7 +88,14 @@ public class Connection {
                 if (presence.getStatus() != null)
                     System.out.printf("\033[1;33m** %s has updated its status to %s \033[0m%n", presence.getFrom(), presence.getStatus());
                 else {
-                    System.out.printf(Thread.currentThread().getId() + util.SG + "** %s is available  \033[0m%n", presence.getFrom());
+                    String[] data = presence.getStanzaId().split("-");
+                    try{
+                        int id = Integer.parseInt(data[1]);
+                        if (id == 1)
+                            System.out.printf(Thread.currentThread().getId() + util.SG + "** %s is available  \033[0m%n", presence.getFrom());
+                    }catch (Exception e){
+                        System.out.printf(Thread.currentThread().getId() + util.SG + "** %s is available  \033[0m%n", presence.getFrom());
+                    }
                 }
                 System.out.print(util.cursorSave());
             }
@@ -101,7 +107,7 @@ public class Connection {
 
                 System.out.print(util.cursorSave());
             }
-            default -> System.out.printf("%n%s", presence);
+            default -> {}
         }
         System.out.print(util.cursorTo(22, 1));
     }
@@ -141,7 +147,13 @@ public class Connection {
             }else {
                 Presence presence = (Presence) stanza;
                 if (!presence.getFrom().equals(stream.getUser())) {
-                    presenceListener(contacts, presence);
+                    if (presence.getType().equals(Presence.Type.subscribe)){
+                        // If the presence is a request to subscribe to the user roster
+                        // then it creates a new thread to handle it
+                        new Thread(() -> presenceListener(contacts, presence)).start();
+                        Thread.currentThread().join();
+                    } else
+                        presenceListener(contacts, presence);
                 }
             }
 

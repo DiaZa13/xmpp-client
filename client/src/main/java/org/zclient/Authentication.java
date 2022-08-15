@@ -4,7 +4,9 @@ package org.zclient;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.iqregister.AccountManager;
+import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.jid.parts.Localpart;
 
 import java.io.IOException;
@@ -26,6 +28,15 @@ public class Authentication{
         if (connection.isConnected()){
             try {
                 connection.login(user.username(), user.password());
+
+                Presence presence = connection.getStanzaFactory()
+                        .buildPresenceStanza()
+                        .ofType(Presence.Type.available)
+                        .build();
+
+                connection.sendStanza(presence);
+                System.out.println("Me no entender nada xd");
+
                 return true;
             } catch (XMPPException | SmackException | InterruptedException | IOException e) {
                 return false;
