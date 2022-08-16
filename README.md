@@ -91,7 +91,7 @@ Also, it is necessary to enable ansi codes on your terminal. If you don't have i
    ```
    When you execute the project it will print you out a menu where you can log in into an exisiting account or create a new account on the XMPP server. Once you are logged, you can type **-help** to request the option menu. One of the most importante features develop was to sent and receive files, to test this feaure you will find o the main directory a folder named *files/send* on wich you have to save the files you want to send, and also you will find *files/received* folder where you can find the files somebody else sent you. 
    
-   ![image](https://user-images.githubusercontent.com/54074539/184996926-d2e88ba8-df31-4ef4-90e0-808e355696e2.png)
+   ![image](https://user-images.githubusercontent.com/54074539/184999361-12d9f0fe-e19d-404a-8b07-ea03d4455bc4.png)
 
 I hope you enojoy testing this amazing xmmp-client!
 
