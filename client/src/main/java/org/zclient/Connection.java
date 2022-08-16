@@ -32,7 +32,6 @@ public class Connection {
                     .setHost(domain)
                     // sends presence to let know the server that is available
                     .setSendPresence(true)
-                    .enableDefaultDebugger()
                     .setSecurityMode(ConnectionConfiguration.SecurityMode.disabled)
                     .build();
 
@@ -56,12 +55,6 @@ public class Connection {
         System.out.print("\033[0;37mDo you want to accept the subscription? [Y/n] ");
         // the readers got confused i think idk
         String response = read.next();
-        try {
-            // Espera hasta obtener la respuesta
-            Thread.currentThread().wait();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         // Handle request subscription
         if ("n".equalsIgnoreCase(response)) {
             contacts.declineSubscription(stream, presence.getFrom());

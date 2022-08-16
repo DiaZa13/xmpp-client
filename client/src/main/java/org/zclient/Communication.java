@@ -2,28 +2,19 @@ package org.zclient;
 
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.XMPPConnection;
-import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.chat2.Chat;
 import org.jivesoftware.smack.chat2.ChatManager;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.filetransfer.*;
-import org.jivesoftware.smackx.jingleold.JingleManager;
-import org.jivesoftware.smackx.jingleold.JingleSession;
-import org.jivesoftware.smackx.jingleold.media.JingleMediaManager;
-import org.jivesoftware.smackx.jingleold.mediaimpl.multi.MultiMediaManager;
-import org.jivesoftware.smackx.jingleold.nat.BasicTransportManager;
 import org.jxmpp.jid.EntityFullJid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.util.Collections;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Communication {
 
@@ -87,100 +78,68 @@ public class Communication {
         }
     }
 
-//            EntityFullJid to_jid = JidCreate.entityFullFrom(jid);
-//            // stream negotiation based on XEP-0095
-//            OutgoingFileTransfer stream = fileManager.createOutgoingFileTransfer(to_jid);
-//            // when the stream negotiation is done know it can transfer files
-//            File file = new File(path);
-//            // It has an error with the file
-//            if (!file.canRead()) return false;
-//
-//            stream.sendFile(file, "file");
-//
-//            while(!stream.isDone()){
-//                System.out.println(stream.getProgress());
-//                System.out.println(stream.getStatus());
-//            }
-//
-//            return true;
-//        } catch (XmppStringprepException | SmackException e) {
-//            return false;
-//        }
+    public boolean sendFile(String jid, String path){
+        // Use as a transport method In-Band Bytestreams XEP-0047
+        FileTransferNegotiator.IBB_ONLY = true;
+        try {
+            EntityFullJid to_jid = JidCreate.entityFullFrom(jid);
+            // stream negotiation based on XEP-0095
+            OutgoingFileTransfer stream = fileManager.createOutgoingFileTransfer(to_jid);
+            // when the stream negotiation is done know it can transfer files
+            File file = new File(path);
+            // It has an error with the file
+            if (!file.canRead()) return false;
 
+            stream.sendFile(file, "file");
 
-        public boolean sendFile(String jid, String path){
-
-        System.out.print(util.cursorRestore());
-//        try {
-//            // Create a JingleMediaManager. In this case using Jingle Audio Media API
-//            JingleMediaManager mediaManager = new MultiMediaManager(new BasicTransportManager());
-//
-//            // Create a JingleManager using a MultiMediaManager
-//            JingleManager jm = new JingleManager(connection, Collections.singletonList(mediaManager));
-//
-//            // Create a new Jingle Call with a full JID
-//            JingleSession js = jm.createOutgoingJingleSession(JidCreate.entityFullFrom(jid));
-//            // Start the call
-//            js.start();
-//            Thread.sleep(10000);
-//            js.terminate();
-//            Thread.sleep(3000);
-//            return true;
-//        } catch (XMPPException | InterruptedException | XmppStringprepException | SmackException ex) {
-//            ex.printStackTrace();
-//            return false;
-//
-//        }
-            FileTransferNegotiator.IBB_ONLY = true;
-            try {
-                EntityFullJid to_jid = JidCreate.entityFullFrom(jid);
-                // stream negotiation based on XEP-0095
-                OutgoingFileTransfer stream = fileManager.createOutgoingFileTransfer(to_jid);
-                // when the stream negotiation is done know it can transfer files
-                File file = new File(path);
-                // It has an error with the file
-                if (!file.canRead()) return false;
-
-                stream.sendFile(file, "file");
-
+            /* this allows to check the progress of the sending process
                 while(!stream.isDone()){
                     System.out.println(stream.getProgress());
                     System.out.println(stream.getStatus());
                     System.out.println(stream.getBytesSent());
                 }
+            */
 
-                return true;
-            } catch (XmppStringprepException | SmackException e) {
-                return false;
-            }
+            return true;
+        } catch (XmppStringprepException | SmackException e) {
+            return false;
+        }
 
-    }
+}
 
     public void receiveFile(String path){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         FileTransferListener listener = new FileTransferListener() {
             @Override
             public void fileTransferRequest(FileTransferRequest fileTransferRequest) {
-                System.out.println("Te han enviado un archivo");
+                LocalDateTime now = LocalDateTime.now();
+                System.out.println(util.cursorRestore());
+                // TODO change colors
+                System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;94m %s: \033[0;34m%s \033[0m%n", fileTransferRequest.getRequestor(), fileTransferRequest.getFileName());
+                System.out.print(util.cursorSave());
                 // path to save the receipt the file
-                String directoryName = System.getProperty("user.dir");
-                File file = new File(directoryName, fileTransferRequest.getFileName());
-                System.out.println(file.getPath());
-                System.out.println(file.isDirectory());
-                System.out.println(file.getAbsolutePath());
+                File file = new File(path, fileTransferRequest.getFileName());
                 try {
                     System.out.println(fileTransferRequest.getFileName());
                     IncomingFileTransfer fileTransfer = fileTransferRequest.accept();
                     fileTransfer.receiveFile(file);
 
+                    System.out.println(util.cursorRestore());
+                    System.out.printf("** File successfully saved at %s",file.getAbsolutePath());
+                    System.out.println(util.cursorSave());
+
                 } catch (SmackException | IOException e) {
-                    System.out.println("Ocurrió un error");
-                    System.out.println(file.getPath());
-                    System.out.println(file.isDirectory());
-                    System.out.println(file.getAbsolutePath());
+
+                    System.out.println(util.cursorRestore());
+                    System.out.println("** It was an error while sending the file");
+                    System.out.println(util.cursorSave());
+
                     try {
                         fileTransferRequest.reject();
                     } catch (SmackException.NotConnectedException | InterruptedException ex) {
-                        throw new RuntimeException(ex);
+                        System.out.println(util.cursorRestore());
+                        System.out.println("** It was an error while trying to reject the file");
+                        System.out.println(util.cursorSave());
                     }
                 }
             }
