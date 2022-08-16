@@ -33,21 +33,13 @@ Of course, no one template will serve all projects since your needs may be diffe
 - [x] Edit presence message (status)
 - [x] Receive/send notifications
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
 
+### Built With 🛠️
 
-### Built With
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
-* [![Smack][Smack.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=michalsnik&repo=aos)](https://www.oracle.com/java/technologies/)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=michalsnik&repo=aos)](https://github.com/igniterealtime/Smack)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=michalsnik&repo=aos)](https://gitbox.apache.org/repos/asf/maven-sources.git)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=michalsnik&repo=aos)](https://github.com/JetBrains/intellij-community)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
