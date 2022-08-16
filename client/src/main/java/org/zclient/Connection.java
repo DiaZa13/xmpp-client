@@ -9,6 +9,7 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
+import org.jxmpp.jid.impl.JidCreate;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -72,7 +73,7 @@ public class Connection {
         Thread.currentThread().notifyAll();
     }
 
-    public void presenceListener(Presence presence){
+    public void presenceListener(Presence presence, User user){
         System.out.print(util.cursorRestore());
         switch (presence.getType()) {
             case subscribed -> {
@@ -96,6 +97,7 @@ public class Connection {
                         System.out.printf(util.SG + "** %s is available  \033[0m%n", presence.getFrom());
                     }
                 }
+                user.addUser2roster(presence.getFrom().asBareJid(), presence.getFrom().asEntityFullJidIfPossible());
                 System.out.print(util.cursorSave());
             }
             case unavailable -> {
@@ -104,6 +106,7 @@ public class Connection {
                 else
                     System.out.printf(util.SR + "** %s is unavailable \033[0m%n", presence.getFrom());
 
+                user.addUser2roster(presence.getFrom().asBareJid(), presence.getFrom().asEntityFullJidIfPossible());
                 System.out.print(util.cursorSave());
             }
             default -> {}
@@ -111,7 +114,7 @@ public class Connection {
         System.out.print(util.cursorTo(22, 1));
     }
 
-    public void messageListener(Message message){
+    public void messageListener(Message message, User user){
         LocalDateTime now = LocalDateTime.now();
         System.out.print(util.cursorRestore());
 
@@ -123,11 +126,13 @@ public class Connection {
             System.out.print(util.cursorSave());
         }
 
+        user.addUser2roster(message.getFrom().asBareJid(), message.getFrom().asEntityFullJidIfPossible());
+
         // TODO ver si puedo regresarlo a la posicion donde estaba escribiendo
         System.out.print(util.cursorTo(22,1));
     }
 
-    public void addListener(Contacts contacts){
+    public void addListener(Contacts contacts, User user){
 
         // Filter the incoming stanzas
         StanzaFilter message_filter = new StanzaTypeFilter(Message.class);
@@ -141,7 +146,7 @@ public class Connection {
             if (subclass.contains("Message")){
                 Message message = (Message) stanza;
                 if (message.getBody() != null){
-                    new Thread(() -> messageListener(message)).start();
+                    new Thread(() -> messageListener(message, user)).start();
                 }
             }else {
                 Presence presence = (Presence) stanza;
@@ -151,7 +156,7 @@ public class Connection {
                         // then it creates a new thread to handle it
                         new Thread(() -> handlerSubscription(contacts, presence)).start();
                     }else {
-                        new Thread(() -> presenceListener(presence)).start();
+                        new Thread(() -> presenceListener(presence, user)).start();
                     }
                 }
             }

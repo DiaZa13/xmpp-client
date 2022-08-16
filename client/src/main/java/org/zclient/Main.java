@@ -1,11 +1,18 @@
 package org.zclient;
 
+import org.jxmpp.jid.BareJid;
+import org.jxmpp.jid.EntityFullJid;
+import org.jxmpp.jid.impl.JidCreate;
+import org.jxmpp.stringprep.XmppStringprepException;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws XmppStringprepException {
 
         // object to read from console
         Scanner read = new Scanner(System.in);
@@ -13,6 +20,7 @@ public class Main {
 
         String username, password, email, to_user, msg, data = "";
         String option, auth_opt;
+        Map<BareJid, EntityFullJid> user_roster = new HashMap<BareJid, EntityFullJid>();
 
         do {
             System.out.print(util.clearScreen());
@@ -35,7 +43,7 @@ public class Main {
                     username = read.nextLine();
                     System.out.print("Password: ");
                     password = read.nextLine();
-                    User user = new User(username, password);
+                    User user = new User(username, password, user_roster);
 
                     if (!authentication.singIn(user)){
                         System.out.println("\033[0;37m** It was an error while trying to log in \033[0m");
@@ -55,10 +63,9 @@ public class Main {
                         Contacts contacts = new Contacts(connection.getStream());
                         Communication communication = new Communication(connection.getStream());
                         // Listen for income messages and presences
-                        connection.addListener(contacts);
-                        // Saves the actual working directory
-                        String directoryName = System.getProperty("user.dir");
-                        communication.receiveFile("/files");
+                        connection.addListener(contacts, user);
+                        // Listen for income files
+                        communication.receiveFile("..\\files/received");
 
                         do{
                             System.out.print(util.cursorTo(22,1) + "\033[0J");
@@ -71,7 +78,6 @@ public class Main {
                                 System.out.println("\t-details<email>                   details of a user");
                                 System.out.println("\t-msg<user/group jid, msg/file>    sends a message  to a group or user");
                                 System.out.println("\t-file<user jid, file path>        sends a file to the specified user");
-                                System.out.println("\t-wk                               prints the current working directory");
                                 System.out.println("\t-join<room@service/nickname>      join a chat room");
                                 System.out.println("\t-presence<new presence>           edit the message presence");
                                 System.out.println("\t-show<new presence>               change the user show state");
@@ -121,16 +127,12 @@ public class Main {
                                 String[] parts = data.split(",");
                                 to_user = parts[0];
                                 msg = parts[1].trim();
-
-                                if(communication.sendFile(to_user, msg))
-                                    System.out.println("\033[0;37m**The file was sent successfully %s\033[0m%n");
+                                Map<BareJid, EntityFullJid> roster = user.roster();
+                                if(communication.sendFile(roster.get(JidCreate.entityBareFrom(to_user)), msg))
+                                    System.out.println("\033[0;37m** The file was sent successfully\033[0m");
                                 else
-                                    System.out.println("\033[0;37m**It was an error while trying to send the file\033[0m");
+                                    System.out.println("\033[0;37m** It was an error while trying to send the file\033[0m");
 
-                                System.out.print(util.cursorSave());
-
-                            } else if (auth_opt.startsWith("-wk")) {
-                                System.out.println("Current working directory is = " + directoryName);
                                 System.out.print(util.cursorSave());
 
                             } else if (auth_opt.startsWith("-join")) {
@@ -180,7 +182,7 @@ public class Main {
                     password = read.nextLine();
                     System.out.print("Email: ");
                     email = read.nextLine();
-                    User user = new User(username, password);
+                    User user = new User(username, password, user_roster);
                     authentication.singUp(user, email);
 
                     System.out.println("The account was created successfully\n");

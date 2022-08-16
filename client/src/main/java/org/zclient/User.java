@@ -3,8 +3,14 @@ package org.zclient;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.packet.Presence;
+import org.jxmpp.jid.BareJid;
+import org.jxmpp.jid.EntityFullJid;
 
-public record User(String username, String password) {
+import java.util.HashMap;
+import java.util.Map;
+
+public record User(String username, String password, Map<BareJid, EntityFullJid> roster) {
+
     public User {
         if (username.isEmpty() || password.isEmpty()) {
             throw new java.lang.IllegalArgumentException(
@@ -25,5 +31,10 @@ public record User(String username, String password) {
             return false;
         }
     }
+
+    public void addUser2roster(BareJid email, EntityFullJid jid){
+        roster.put(email, jid);
+    }
+
 }
 

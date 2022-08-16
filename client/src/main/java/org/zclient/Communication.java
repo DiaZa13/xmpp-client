@@ -78,15 +78,14 @@ public class Communication {
         }
     }
 
-    public boolean sendFile(String jid, String path){
+    public boolean sendFile(EntityFullJid jid, String filename){
         // Use as a transport method In-Band Bytestreams XEP-0047
         FileTransferNegotiator.IBB_ONLY = true;
         try {
-            EntityFullJid to_jid = JidCreate.entityFullFrom(jid);
             // stream negotiation based on XEP-0095
-            OutgoingFileTransfer stream = fileManager.createOutgoingFileTransfer(to_jid);
+            OutgoingFileTransfer stream = fileManager.createOutgoingFileTransfer(jid);
             // when the stream negotiation is done know it can transfer files
-            File file = new File(path);
+            File file = new File("..\\files/send",filename);
             // It has an error with the file
             if (!file.canRead()) return false;
 
@@ -99,13 +98,12 @@ public class Communication {
                     System.out.println(stream.getBytesSent());
                 }
             */
-
             return true;
-        } catch (XmppStringprepException | SmackException e) {
+        } catch (SmackException e) {
             return false;
         }
 
-}
+    }
 
     public void receiveFile(String path){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -113,33 +111,33 @@ public class Communication {
             @Override
             public void fileTransferRequest(FileTransferRequest fileTransferRequest) {
                 LocalDateTime now = LocalDateTime.now();
-                System.out.println(util.cursorRestore());
+//                System.out.println(util.cursorRestore());
                 // TODO change colors
                 System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;94m %s: \033[0;34m%s \033[0m%n", fileTransferRequest.getRequestor(), fileTransferRequest.getFileName());
-                System.out.print(util.cursorSave());
+//                System.out.print(util.cursorSave());
                 // path to save the receipt the file
                 File file = new File(path, fileTransferRequest.getFileName());
                 try {
                     System.out.println(fileTransferRequest.getFileName());
                     IncomingFileTransfer fileTransfer = fileTransferRequest.accept();
                     fileTransfer.receiveFile(file);
-
-                    System.out.println(util.cursorRestore());
-                    System.out.printf("** File successfully saved at %s",file.getAbsolutePath());
-                    System.out.println(util.cursorSave());
+                    fileTransfer.cancel();
+//                    System.out.println(util.cursorRestore());
+                    System.out.printf("\033[0;37m** File successfully saved at %s\033[0m",file.getAbsolutePath());
+//                    System.out.println(util.cursorSave());
 
                 } catch (SmackException | IOException e) {
 
-                    System.out.println(util.cursorRestore());
-                    System.out.println("** It was an error while sending the file");
-                    System.out.println(util.cursorSave());
+//                    System.out.println(util.cursorRestore());
+                    System.out.println("\033[0;37m** It was an error while receiving the file\033[0m");
+//                    System.out.println(util.cursorSave());
 
                     try {
                         fileTransferRequest.reject();
                     } catch (SmackException.NotConnectedException | InterruptedException ex) {
-                        System.out.println(util.cursorRestore());
-                        System.out.println("** It was an error while trying to reject the file");
-                        System.out.println(util.cursorSave());
+//                        System.out.println(util.cursorRestore());
+                        System.out.println("\033[0;37m** It was an error while trying to reject the file\033[0m");
+//                        System.out.println(util.cursorSave());
                     }
                 }
             }
