@@ -36,20 +36,21 @@ Of course, no one template will serve all projects since your needs may be diffe
 
 ### Built With 🛠️
 
-[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=michalsnik&repo=aos)](https://www.oracle.com/java/technologies/)
-[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=michalsnik&repo=aos)](https://github.com/igniterealtime/Smack)
-[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=michalsnik&repo=aos)](https://gitbox.apache.org/repos/asf/maven-sources.git)
-[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=michalsnik&repo=aos)](https://github.com/JetBrains/intellij-community)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=openjdk&repo=jdk)](https://www.oracle.com/java/technologies/)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=igniterealtime&repo=Smack)](https://github.com/igniterealtime/Smack)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=apache&repo=maven-surefire)](https://github.com/apache/maven-surefire)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=apache&repo=maven-plugin-tools)](https://github.com/apache/maven-plugin-tools)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?theme=calm&username=JetBrains&repo=intellij-community)](https://github.com/JetBrains/intellij-community)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
 <!-- GETTING STARTED -->
-## Getting Started
+## Getting Started 🚀
 Here are the basic steps to get a running copy of zclient on your local machine
 
-### Prerequisites
+### Prerequisites 📋
 
 Firs of all, be sure to have install the next dependencies.
 
@@ -68,7 +69,7 @@ Also, it is necessary to enable ansi codes on your terminal. If you don't have i
   ```
  For the changes to take effect, you will need to open a new terminal.
 
-### Installation
+### Installation 🔧
 
 1. Clone the repo
    ```sh
@@ -86,17 +87,17 @@ Also, it is necessary to enable ansi codes on your terminal. If you don't have i
    ```sh
    mvnw package
    ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- USAGE EXAMPLES -->
+## Usage ⚙️
  5. Execute the xmpp-client (make sure you still on client directory)
    ```sh
    java -jar .\target\xmmp-client-1.0.jar
    ```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- USAGE EXAMPLES -->
-## Usage
+   
+   One of the most important features develop on this client was to send and receive files. 
 
 
 
@@ -104,7 +105,7 @@ Also, it is necessary to enable ansi codes on your terminal. If you don't have i
 
 
 <!-- CONTACT -->
-## Contact
+## Contact ✒️
 
 Diana Zaray Corado - zaraycorado@gmail.com
 
