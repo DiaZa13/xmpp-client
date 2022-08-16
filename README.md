@@ -49,6 +49,8 @@ Firs of all, be sure to have install the next dependencies.
 
 * java SDK 18 
 You can install it via [Java SE 18](https://www.oracle.com/java/technologies/javase/jdk18-archive-downloads.html)
+* Add JAVA_HOME to yout enviroment variables
+Here is an example of how to do it [Set JAVS_HOME on windows](https://stackoverflow.com/questions/2619584/how-to-set-java-home-on-windows-7/17142065#17142065)
 
 Also, it is necessary to enable ansi codes on your terminal. If you don't have it already, you can do it, by running the next command.
 
@@ -68,7 +70,7 @@ Also, it is necessary to enable ansi codes on your terminal. If you don't have i
    ```sh
    git clone https://github.com/DiaZa13/xmpp-client.git
    ```
-2. Change directory
+2. Go to the already clone project directory and change to client directory
    ```sh
    cd client
    ```
