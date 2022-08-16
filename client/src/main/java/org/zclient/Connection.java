@@ -60,6 +60,8 @@ public class Connection {
                 System.out.printf("\033[1;33m** %s sent you a subscription request \033[0m%n", presence.getFrom());
                 user.requests().push(presence.getFrom());
             }
+            case unsubscribe -> System.out.printf("\033[1;33m** %s unsubscribe from your roster \033[0m%n", presence.getFrom());
+
             case subscribed -> System.out.printf("\033[1;33m** %s is subscribed to your roster \033[0m%n", presence.getFrom());
 
             case unsubscribed -> System.out.printf("\033[1;33m** %s is unsubscribed to your roster \033[0m%n", presence.getFrom());
@@ -67,8 +69,8 @@ public class Connection {
             case available -> {
                 if (presence.getStatus() != null)
                     System.out.printf("\033[1;33m** %s has updated its status to %s \033[0m%n", presence.getFrom(), presence.getStatus());
-                else if (presence.getMode() != null) {
-                    
+                else if (presence.getMode() != Presence.Mode.available) {
+                    System.out.printf("\033[1;33m** %s has updated its show to %s \033[0m%n", presence.getFrom(), presence.getMode());
                 } else {
                     String[] data = presence.getStanzaId().split("-");
                     try{
@@ -84,11 +86,15 @@ public class Connection {
             case unavailable -> {
                 if (presence.getStatus() != null)
                     System.out.printf("\033[1;33m** %s has updated its status to %s \033[0m%n", presence.getFrom(), presence.getStatus());
+                else if (presence.getMode() != null) {
+                    System.out.printf("\033[1;33m** %s has updated its show to %s \033[0m%n", presence.getFrom(), presence.getMode());
+                }
                 else
                     System.out.printf(util.SR + "** %s is unavailable \033[0m%n", presence.getFrom());
 
                 user.addUser2roster(presence.getFrom().asBareJid(), presence.getFrom().asEntityFullJidIfPossible());
             }
+            case error -> System.out.printf(util.SR + "** It has ocurred an error \033[0m%n");
             default -> System.out.printf("%s%n", presence);
         }
 
