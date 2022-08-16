@@ -6,8 +6,6 @@ import org.jivesoftware.smack.chat2.Chat;
 import org.jivesoftware.smack.chat2.ChatManager;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smackx.bytestreams.ibb.InBandBytestreamManager;
-import org.jivesoftware.smackx.bytestreams.ibb.InBandBytestreamSession;
 import org.jivesoftware.smackx.filetransfer.*;
 import org.jxmpp.jid.EntityFullJid;
 import org.jxmpp.jid.impl.JidCreate;
@@ -16,6 +14,13 @@ import org.jxmpp.stringprep.XmppStringprepException;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+/**
+ * Communication
+ * Handles the communication between two XMPP clients
+ * @author zaray
+ * @version 1.0
+ */
 
 public class Communication {
 
@@ -30,6 +35,11 @@ public class Communication {
         this.connection = connection;
     }
 
+    /**
+     * Send a direct message
+     * @param to - JID of the receiver
+     * @param msg - message to be sent
+     */
     public void directMessage(String to, String msg){
         try {
             Chat chat = chatManager.chatWith(JidCreate.entityBareFrom(to));
@@ -47,6 +57,11 @@ public class Communication {
 
     }
 
+    /**
+     * Sends a message to a group
+     * @param to - JID of the group <room@service>
+     * @param msg - message to be sent
+     */
     public void groupMessage(String to, String msg){
         try {
             Message message = connection.getStanzaFactory()
@@ -62,7 +77,8 @@ public class Communication {
         }
     }
 
-    /*
+    /**
+     * Allows to join the current logged user to an existing group
     * @param jid → describes the jid in the form <room@service/nickname>
     */
     public boolean joinGroup(String jid){
@@ -79,6 +95,11 @@ public class Communication {
         }
     }
 
+    /**
+     * Allows the user to send files through IBB
+     * @param jid - JID of the receiver
+     * @param filename - name of the file to be sent
+     * */
     public boolean sendFile(EntityFullJid jid, String filename){
         // Use as a transport method In-Band Bytestreams XEP-0047
         FileTransferNegotiator.IBB_ONLY = true;
@@ -106,6 +127,10 @@ public class Communication {
 
     }
 
+    /**
+     * Allows the user to receive files through IBB sessions
+     * @param path - path were to save the received files
+     * */
     public void receiveFile(String path){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 

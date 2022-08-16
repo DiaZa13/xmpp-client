@@ -14,6 +14,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Contacts
+ * Handle the contacts of a xmpp-user
+ * @author zaray
+ * @version 1.0
+ */
+
 public class Contacts {
 
     private final Roster roster;
@@ -24,6 +31,10 @@ public class Contacts {
 
     }
 
+    /**
+     * Show the roster of a user
+     * @return a Map with the RosterEntry as key and presence as a value
+     */
     public Map<RosterEntry, Presence> getContacts(){
         Collection<RosterEntry> entries = roster.getEntries();
         Map<RosterEntry, Presence> users = new HashMap<RosterEntry, Presence>();
@@ -34,6 +45,11 @@ public class Contacts {
         return users;
     }
 
+    /**
+     * Add a new user to the current logged user roster
+     * @param email - JID of the user that wants to add
+     * @return true if the operation was successful, false otherwise
+     */
     public boolean addContact(String email){
         try {
             BareJid jid = JidCreate.bareFrom(email);
@@ -47,6 +63,11 @@ public class Contacts {
 
     }
 
+    /**
+     * Deletes a user from the current logged user roster
+     * @param email - JID of the user to delete
+     * @return true if the operation was successful, false otherwise
+     */
     public boolean deleteContact(String email){
         try {
             RosterEntry user = roster.getEntry(JidCreate.bareFrom(email));
@@ -59,6 +80,11 @@ public class Contacts {
         }
     }
 
+    /**
+     * Request the details of a users
+     * @param user - JID of the user to request details for
+     * @return JID of the user, presence, show and if it is subscribed to the user presence
+     */
     public String contactDetails(String user){
         try {
             RosterEntry information = roster.getEntry(JidCreate.bareFrom(user));
@@ -78,6 +104,11 @@ public class Contacts {
         return util.SM + "** It was an error while obtaining the details for your contact";
     }
 
+    /**
+     * Rejects a subscription request
+     * @param connection - connection to the xmpp-server
+     * @param to - JID of the user that sent the request
+     */
     public void declineSubscription(AbstractXMPPConnection connection, Jid to){
         Presence presence_response = connection.getStanzaFactory()
                 .buildPresenceStanza()
@@ -92,6 +123,11 @@ public class Contacts {
         }
     }
 
+    /**
+     * Accept a subscription request
+     * @param connection - connection to the xmpp-server
+     * @param to - JID of the user that sent the request
+     */
     public void acceptSubscription(AbstractXMPPConnection connection, Jid to){
         Presence presence_response = connection.getStanzaFactory()
                 .buildPresenceStanza()

@@ -1,6 +1,5 @@
 package org.zclient;
 
-
 import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.filter.OrFilter;
 import org.jivesoftware.smack.filter.StanzaFilter;
@@ -10,12 +9,18 @@ import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 
-import java.io.Console;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import java.util.concurrent.Semaphore;
+
+/**
+ * Connection
+ * Handles a connection to a XMPP-server
+ * @author zaray
+ * @version 1.0
+ */
 
 public class Connection {
     private final String domain;
@@ -26,10 +31,16 @@ public class Connection {
     final Scanner read = new Scanner(System.in);
 
 
+    /**
+     * @param domain - domain to connect to
+     */
     public Connection(String domain){
         this.domain = domain;
     }
 
+    /**
+     * Initiate a connection with the server
+     */
     public void start() {
         try {
             XMPPTCPConnectionConfiguration configuration = XMPPTCPConnectionConfiguration.builder()
@@ -48,10 +59,18 @@ public class Connection {
         }
     }
 
+    /**
+     * @return the connection stream object
+     */
     public AbstractXMPPConnection getStream() {
         return stream;
     }
 
+    /**
+     * Handles the income presences
+     * @param presence - income presence
+     * @param user - current logged user
+     */
     public synchronized void presenceListener(Presence presence, User user){
 
         System.out.print(util.cursorRestore());
@@ -105,6 +124,11 @@ public class Connection {
 
     }
 
+    /**
+     * Handles the income messages
+     * @param message - income message
+     * @param user - current logged user
+     */
     public synchronized void messageListener(Message message, User user){
         LocalDateTime now = LocalDateTime.now();
         System.out.print(util.cursorRestore());
@@ -122,6 +146,10 @@ public class Connection {
         System.out.print(util.cursorTo(32,1));
     }
 
+    /**
+     * Allows the connection to listen for the income stanzas
+     * @param user - current logged user
+     */
     public void addListener(User user){
 
         // Filter the incoming stanzas
@@ -151,6 +179,9 @@ public class Connection {
         stream.addStanzaListener(listener, stanzaFilter);
     }
 
+    /**
+     * Disconnect (logout) the current logged user and terminate the current connection
+     */
     public void close(){
         stream.disconnect();
     }

@@ -7,10 +7,15 @@ import org.jxmpp.jid.BareJid;
 import org.jxmpp.jid.EntityFullJid;
 import org.jxmpp.jid.Jid;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+
+/**
+* User
+* Defines a basic record xmpp-user
+* @author zaray
+ *@version 1.0
+**/
 
 public record User(String username, String password, Map<BareJid, EntityFullJid> roster, Stack<Jid> requests) {
 
@@ -21,6 +26,12 @@ public record User(String username, String password, Map<BareJid, EntityFullJid>
         }
     }
 
+    /**
+     * Allows to edit the presence message (status) of a user
+     * @param connection - the actual connection to a xmpp-server
+     * @param status - defines the new presence message (status)
+     * @return true if successfully edit the status, otherwise false
+     **/
     public boolean editPresence(AbstractXMPPConnection connection, String status){
         Presence presence = connection.getStanzaFactory()
                 .buildPresenceStanza()
@@ -35,6 +46,11 @@ public record User(String username, String password, Map<BareJid, EntityFullJid>
         }
     }
 
+    /**
+     * Handle the full JID of users in the roster
+     * @param email - bareJid of the user
+     * @param jid - full JID of the users (with resource part)
+     **/
     public void addUser2roster(BareJid email, EntityFullJid jid){
         roster.put(email, jid);
     }

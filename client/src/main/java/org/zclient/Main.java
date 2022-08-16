@@ -92,7 +92,6 @@ public class  Main {
                                 System.out.println("\t-file<user jid, file path>        sends a file to the specified user");
                                 System.out.println("\t-join<room@service/nickname>      join a chat room");
                                 System.out.println("\t-presence<new presence>           edit the message presence");
-                                System.out.println("\t-show<new show>                   change the user presence show");
                                 System.out.println("\t-delete                           delete the actual logged account");
                                 System.out.println("\t-logout                           logout \033[0m");
 
