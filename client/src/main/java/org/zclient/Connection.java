@@ -101,7 +101,7 @@ public class Connection {
 
         System.out.print(util.cursorSave());
 
-        System.out.print(util.cursorTo(22, 1));
+        System.out.print(util.cursorTo(32, 1));
 
     }
 
@@ -119,7 +119,7 @@ public class Connection {
         user.addUser2roster(message.getFrom().asBareJid(), message.getFrom().asEntityFullJidIfPossible());
 
         System.out.print(util.cursorSave());
-        System.out.print(util.cursorTo(22,1));
+        System.out.print(util.cursorTo(32,1));
     }
 
     public void addListener(User user){

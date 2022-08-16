@@ -2,7 +2,6 @@ package org.zclient;
 
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.roster.RosterEntry;
-import org.jivesoftware.smack.sm.SMUtils;
 import org.jxmpp.jid.BareJid;
 import org.jxmpp.jid.EntityFullJid;
 import org.jxmpp.jid.Jid;
@@ -14,7 +13,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class Main {
+public class  Main {
+
     public static void main(String[] args) throws XmppStringprepException {
 
         // object to read from console
@@ -66,9 +66,9 @@ public class Main {
                         // Saves the cursor position
                         System.out.print(util.cursorSave());
                         // Moving the cursor to the bottom
-                        System.out.printf(util.cursorTo(21,1) + util.BKG + "[" + now.format(DateTimeFormatter.ofPattern("HH:mm:ss"))  + "] %s                                                           [-help]  %n\033[0m",connection.getStream().getUser().asBareJid());
+                        System.out.printf(util.cursorTo(31,1) + util.BKG + "[" + now.format(DateTimeFormatter.ofPattern("HH:mm:ss"))  + "] %s                                                           [-help]  %n\033[0m",connection.getStream().getUser().asBareJid());
                         // Defines the scroll window
-                        System.out.print(util.scrollSet(2,20));
+                        System.out.print(util.scrollSet(2,30));
 
                         Contacts contacts = new Contacts(connection.getStream());
                         Communication communication = new Communication(connection.getStream());
@@ -78,7 +78,7 @@ public class Main {
                         communication.receiveFile("..\\files/received");
 
                         do{
-                            System.out.print(util.cursorTo(22,1) + "\033[0J");
+                            System.out.print(util.cursorTo(32,1) + "\033[0J");
                             auth_opt = read.nextLine();
                             // Restore the cursor to the last saved position
                             System.out.print(util.cursorRestore());
@@ -115,7 +115,7 @@ public class Main {
 
                                 }else{
                                     Jid friend = user.requests().pop();
-                                    System.out.print(util.cursorTo(22,1) + "\033[0K");
+                                    System.out.print(util.cursorTo(32,1) + "\033[0K");
                                     System.out.printf(" -> %s wants to subscribe to your roster? [y/n] ", friend);
                                     response = read.nextLine();
 
@@ -221,7 +221,7 @@ public class Main {
                                 System.out.println(util.scrollScreen());
 
                             }else {
-                                System.out.printf("%s** Invalid option. Type -help to see available options...%n", util.SM);
+                                System.out.printf("%s** Invalid option. Type -help to see available options...\033[0m%n", util.SM);
                                 System.out.print(util.cursorSave());
                             }
                         }while (!"-logout".equals(auth_opt));

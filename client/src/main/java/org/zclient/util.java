@@ -1,11 +1,5 @@
 package org.zclient;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class util {
 
     // ANSI Terminal codes
@@ -52,8 +46,8 @@ public class util {
     public static final String BKG = "\033[48;5;61m";
 
     // Message colors
-    public static final String DMU = "\033[1;38;5;26m";
-    public static final String DMM = "\033[38;5;39m";
+    public static final String DMU = "\033[1;38;5;209m";
+    public static final String DMM = "\033[38;5;216m";
     public static final String BW = "\033[1;38;5;231m";
 
 

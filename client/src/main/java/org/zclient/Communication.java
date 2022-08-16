@@ -6,13 +6,14 @@ import org.jivesoftware.smack.chat2.Chat;
 import org.jivesoftware.smack.chat2.ChatManager;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smackx.bytestreams.ibb.InBandBytestreamManager;
+import org.jivesoftware.smackx.bytestreams.ibb.InBandBytestreamSession;
 import org.jivesoftware.smackx.filetransfer.*;
 import org.jxmpp.jid.EntityFullJid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -107,38 +108,40 @@ public class Communication {
 
     public void receiveFile(String path){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
         FileTransferListener listener = new FileTransferListener() {
             @Override
             public void fileTransferRequest(FileTransferRequest fileTransferRequest) {
                 LocalDateTime now = LocalDateTime.now();
-//                System.out.println(util.cursorRestore());
-                // TODO change colors
-                System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;94m %s: \033[0;34m%s \033[0m%n", fileTransferRequest.getRequestor(), fileTransferRequest.getFileName());
-//                System.out.print(util.cursorSave());
+                System.out.print(util.cursorRestore());
+                System.out.printf("\033[0;93m[" + formatter.format(now) + "]%s %s: %s sent you %s \033[0m%n", util.DMU, fileTransferRequest.getRequestor(), util.DMM, fileTransferRequest.getFileName());
+                System.out.print(util.cursorSave());
                 // path to save the receipt the file
                 File file = new File(path, fileTransferRequest.getFileName());
                 try {
-                    System.out.println(fileTransferRequest.getFileName());
                     IncomingFileTransfer fileTransfer = fileTransferRequest.accept();
                     fileTransfer.receiveFile(file);
-                    fileTransfer.cancel();
-//                    System.out.println(util.cursorRestore());
-                    System.out.printf("\033[0;37m** File successfully saved at %s\033[0m",file.getAbsolutePath());
-//                    System.out.println(util.cursorSave());
 
+                    System.out.print(util.cursorRestore());
+                    System.out.printf("%s** File successfully saved at %s\033[0m%n",util.SM, file.getAbsolutePath());
+                    System.out.print(util.cursorSave());
+
+
+                    System.out.print(util.cursorTo(32,1));
                 } catch (SmackException | IOException e) {
 
-//                    System.out.println(util.cursorRestore());
-                    System.out.println("\033[0;37m** It was an error while receiving the file\033[0m");
-//                    System.out.println(util.cursorSave());
+                    System.out.print(util.cursorRestore());
+                    System.out.printf("%s** It was an error while receiving the file\033[0m%n", util.SM);
+                    System.out.print(util.cursorSave());
 
                     try {
                         fileTransferRequest.reject();
                     } catch (SmackException.NotConnectedException | InterruptedException ex) {
-//                        System.out.println(util.cursorRestore());
-                        System.out.println("\033[0;37m** It was an error while trying to reject the file\033[0m");
-//                        System.out.println(util.cursorSave());
+                        System.out.print(util.cursorRestore());
+                        System.out.printf("%s** It was an error while trying to reject the file\033[0m%n", util.SM);
+                        System.out.print(util.cursorSave());
                     }
+                    System.out.print(util.cursorTo(32,1));
                 }
             }
         };
