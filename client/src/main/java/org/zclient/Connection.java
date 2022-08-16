@@ -58,8 +58,8 @@ public class Connection {
         System.out.print(util.cursorTo(22, 1));
         System.out.print("\033[0;37mDo you want to accept the subscription? [Y/n] ");
         // the readers got confused i think idk
-
         String response = read.next();
+
         // Handle request subscription
         if ("n".equalsIgnoreCase(response)) {
             contacts.declineSubscription(stream, presence.getFrom());
@@ -74,6 +74,8 @@ public class Connection {
             System.out.println("\033[0;37m** Accepted request \033[0m");
             System.out.print(util.cursorSave());
         }
+
+        System.out.print(util.cursorTo(22, 1));
     }
 
     public synchronized void presenceListener(Presence presence, User user){
