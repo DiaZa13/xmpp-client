@@ -9,18 +9,21 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
-import org.jxmpp.jid.impl.JidCreate;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 
 public class Connection {
     private final String domain;
     private AbstractXMPPConnection stream;
+    static Semaphore mutex = new Semaphore(0);
+    static Semaphore mutex1 = new Semaphore(1);
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     Scanner read = new Scanner(System.in);
+
 
     public Connection(String domain){
         this.domain = domain;
@@ -55,6 +58,7 @@ public class Connection {
         System.out.print(util.cursorTo(22, 1));
         System.out.print("\033[0;37mDo you want to accept the subscription? [Y/n] ");
         // the readers got confused i think idk
+
         String response = read.next();
         // Handle request subscription
         if ("n".equalsIgnoreCase(response)) {
@@ -70,20 +74,17 @@ public class Connection {
             System.out.println("\033[0;37m** Accepted request \033[0m");
             System.out.print(util.cursorSave());
         }
-        Thread.currentThread().notifyAll();
     }
 
-    public void presenceListener(Presence presence, User user){
+    public synchronized void presenceListener(Presence presence, User user){
+
         System.out.print(util.cursorRestore());
+
         switch (presence.getType()) {
-            case subscribed -> {
-                System.out.printf("\033[1;33m** %s is subscribed to your roster \033[0m%n", presence.getFrom());
-                System.out.print(util.cursorSave());
-            }
-            case unsubscribed -> {
-                System.out.printf("\033[1;33m** %s is unsubscribed to your roster \033[0m%n", presence.getFrom());
-                System.out.print(util.cursorSave());
-            }
+            case subscribed -> System.out.printf("\033[1;33m** %s is subscribed to your roster \033[0m%n", presence.getFrom());
+
+            case unsubscribed -> System.out.printf("\033[1;33m** %s is unsubscribed to your roster \033[0m%n", presence.getFrom());
+
             case available -> {
                 if (presence.getStatus() != null)
                     System.out.printf("\033[1;33m** %s has updated its status to %s \033[0m%n", presence.getFrom(), presence.getStatus());
@@ -98,7 +99,6 @@ public class Connection {
                     }
                 }
                 user.addUser2roster(presence.getFrom().asBareJid(), presence.getFrom().asEntityFullJidIfPossible());
-                System.out.print(util.cursorSave());
             }
             case unavailable -> {
                 if (presence.getStatus() != null)
@@ -107,28 +107,31 @@ public class Connection {
                     System.out.printf(util.SR + "** %s is unavailable \033[0m%n", presence.getFrom());
 
                 user.addUser2roster(presence.getFrom().asBareJid(), presence.getFrom().asEntityFullJidIfPossible());
-                System.out.print(util.cursorSave());
             }
-            default -> {}
+            default -> System.out.printf("%s%n", presence);
         }
+
+        System.out.println(util.cursorSave());
+
         System.out.print(util.cursorTo(22, 1));
+
     }
 
-    public void messageListener(Message message, User user){
+    public synchronized void messageListener(Message message, User user){
         LocalDateTime now = LocalDateTime.now();
         System.out.print(util.cursorRestore());
 
         if (message.getFrom().toString().contains("conference")){
             System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;94m %s: \033[0;34m%s \033[0m%n", message.getFrom(), message.getBody());
-            System.out.print(util.cursorSave());
         }else{
             System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;95m %s: \033[0;37m%s \033[0m%n", message.getFrom().asBareJid(), message.getBody());
-            System.out.print(util.cursorSave());
+
         }
 
         user.addUser2roster(message.getFrom().asBareJid(), message.getFrom().asEntityFullJidIfPossible());
 
         // TODO ver si puedo regresarlo a la posicion donde estaba escribiendo
+        System.out.print(util.cursorSave());
         System.out.print(util.cursorTo(22,1));
     }
 
