@@ -11,6 +11,8 @@ import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Contacts {
 
@@ -22,14 +24,14 @@ public class Contacts {
 
     }
 
-    public void getContacts(){
+    public Map<RosterEntry, Presence> getContacts(){
         Collection<RosterEntry> entries = roster.getEntries();
+        Map<RosterEntry, Presence> users = new HashMap<RosterEntry, Presence>();
         for (RosterEntry entry : entries) {
-            Presence 	presence = roster.getPresence(entry.getJid());
-            // delete this print of here
-            System.out.printf("User: %s -> %s%n", entry.getJid(), presence.getType());
+            Presence presence = roster.getPresence(entry.getJid());
+            users.put(entry, presence);
         }
-
+        return users;
     }
 
     public boolean addContact(String email){
@@ -60,19 +62,20 @@ public class Contacts {
     public String contactDetails(String user){
         try {
             RosterEntry information = roster.getEntry(JidCreate.bareFrom(user));
-            Presence presence = roster.getPresence(JidCreate.bareFrom(user));
-            return String.format("User JID: %s%n\tName: %s%n\tPresence: %s%n\tStatus: %s%n\tShow: %s%n\tContact: %s" ,
-                    information.getJid(),
-                    information.getName() != null?information.getName():"-",
-                    presence.getType(),
-                    presence.getStatus() != null?presence.getStatus():"-",
-                    presence.getMode(),
-                    roster.isSubscribedToMyPresence(JidCreate.bareFrom(user)));
-
+            if (information != null){
+                Presence presence = roster.getPresence(JidCreate.bareFrom(user));
+                return String.format("User JID: %s%n\tName: %s%n\tPresence: %s%n\tStatus: %s%n\tShow: %s%n\tContact: %s" ,
+                        information.getJid(),
+                        information.getName() != null?information.getName():"-",
+                        presence.getType(),
+                        presence.getStatus() != null?presence.getStatus():"-",
+                        presence.getMode(),
+                        roster.isSubscribedToMyPresence(JidCreate.bareFrom(user)));
+            }
         } catch (XmppStringprepException e) {
-            return "error";
+            return util.SM + "** It was an error while obtaining the details for your contact";
         }
-
+        return util.SM + "** It was an error while obtaining the details for your contact";
     }
 
     public void declineSubscription(AbstractXMPPConnection connection, Jid to){

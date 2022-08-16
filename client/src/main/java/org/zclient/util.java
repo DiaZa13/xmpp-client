@@ -47,44 +47,33 @@ public class util {
         return "\033D";
     }
 
-    public static final String BG = "\033[1;32m";
+    public static final String BG = "\033[1;38;5;28m";
+    public static final String BR = "\033[1;38;5;9m";
     public static final String BKG = "\033[48;5;61m";
+
+    // Message colors
+    public static final String DMU = "\033[1;38;5;26m";
+    public static final String DMM = "\033[38;5;39m";
+    public static final String BW = "\033[1;38;5;231m";
 
 
     // Server response colors
+    public static final String SM = "\033[38;5;240m";
     public static final String SG = "\033[1;38;5;22m";
     public static final String SR = "\033[1;38;5;52m";
+    /* warning colors
+    * presence message updates
+    * show updates
+    * deleted contacts
+    */
+    public static final String SW = "\033[1;38;5;11m";
+
+    // for subscription requests
+    public static final String SF = "\033[1;38;5;202m";
+    // unsubscribed users
+    public static final String SU = "\033[1;38;5;172m";
+    // subscribed users
+    public static final String SS = "\033[1;38;5;166m";
 
 
-    public List<Integer> readCurrentPosition() {
-        List<Integer> position = Arrays.asList(22, 1);
-    try {
-        System.out.print(util.cursorTo(23,1));
-        System.out.print("\033[6n");
-        System.out.println(cursorRestore());
-
-        String result = "";
-        int character;
-
-        do {
-            character = System.in.read();
-            if (character == 27) {
-                result += "^";
-            } else {
-                result += (char) character;
-            }
-        } while (character != 82); // 'R'
-
-        Pattern pattern = Pattern.compile("\\^\\[(\\d+);(\\d+)R");
-        Matcher matcher = pattern.matcher(result);
-
-        if (matcher.matches()) {
-            position.set(0, Integer.valueOf(matcher.group(2)));
-            position.set(1, Integer.valueOf(matcher.group(1)));
-        }
-    } catch (IOException e) {
-           return position;
-        }
-        return position;
-    }
 }

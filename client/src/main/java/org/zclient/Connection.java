@@ -10,6 +10,7 @@ import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 
+import java.io.Console;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -57,20 +58,20 @@ public class Connection {
 
         switch (presence.getType()) {
             case subscribe -> {
-                System.out.printf("\033[1;33m** %s sent you a subscription request \033[0m%n", presence.getFrom());
+                System.out.printf("%s** %s sent you a subscription request \033[0m%n", util.SF, presence.getFrom());
                 user.requests().push(presence.getFrom());
             }
-            case unsubscribe -> System.out.printf("\033[1;33m** %s unsubscribe from your roster \033[0m%n", presence.getFrom());
+            case unsubscribe -> System.out.printf("%s** %s unsubscribe from your roster \033[0m%n", util.SW, presence.getFrom());
 
-            case subscribed -> System.out.printf("\033[1;33m** %s is subscribed to your roster \033[0m%n", presence.getFrom());
+            case subscribed -> System.out.printf("%s** %s is subscribed to your roster \033[0m%n", util.SS, presence.getFrom());
 
-            case unsubscribed -> System.out.printf("\033[1;33m** %s is unsubscribed to your roster \033[0m%n", presence.getFrom());
+            case unsubscribed -> System.out.printf("%s** %s is unsubscribed to your roster \033[0m%n", util.SU, presence.getFrom());
 
             case available -> {
                 if (presence.getStatus() != null)
-                    System.out.printf("\033[1;33m** %s has updated its status to %s \033[0m%n", presence.getFrom(), presence.getStatus());
-                else if (presence.getMode() != Presence.Mode.available) {
-                    System.out.printf("\033[1;33m** %s has updated its show to %s \033[0m%n", presence.getFrom(), presence.getMode());
+                    System.out.printf("%s** %s has updated its status to %s \033[0m%n", util.SW, presence.getFrom(), presence.getStatus());
+                else if (presence.getMode() != Presence.Mode.available && presence.getMode() != null) {
+                    System.out.printf("%s** %s has updated its show to %s \033[0m%n", util.SW, presence.getFrom(), presence.getMode());
                 } else {
                     String[] data = presence.getStanzaId().split("-");
                     try{
@@ -85,9 +86,9 @@ public class Connection {
             }
             case unavailable -> {
                 if (presence.getStatus() != null)
-                    System.out.printf("\033[1;33m** %s has updated its status to %s \033[0m%n", presence.getFrom(), presence.getStatus());
-                else if (presence.getMode() != null) {
-                    System.out.printf("\033[1;33m** %s has updated its show to %s \033[0m%n", presence.getFrom(), presence.getMode());
+                    System.out.printf("%s** %s has updated its status to %s \033[0m%n", util.SW, presence.getFrom(), presence.getStatus());
+                else if (presence.getMode() != null && presence.getMode() != Presence.Mode.available) {
+                    System.out.printf("%s** %s has updated its show to %s \033[0m%n", util.SW, presence.getFrom(), presence.getMode());
                 }
                 else
                     System.out.printf(util.SR + "** %s is unavailable \033[0m%n", presence.getFrom());
@@ -111,18 +112,17 @@ public class Connection {
         if (message.getFrom().toString().contains("conference")){
             System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;94m %s: \033[0;34m%s \033[0m%n", message.getFrom(), message.getBody());
         }else{
-            System.out.printf("\033[0;93m[" + formatter.format(now) + "]\033[1;95m %s: \033[0;37m%s \033[0m%n", message.getFrom().asBareJid(), message.getBody());
+            System.out.printf("\033[0;93m[" + formatter.format(now) + "]%s %s: %s%s \033[0m%n", util.DMU, message.getFrom().asBareJid(), util.DMM, message.getBody());
 
         }
 
         user.addUser2roster(message.getFrom().asBareJid(), message.getFrom().asEntityFullJidIfPossible());
 
-        // TODO ver si puedo regresarlo a la posicion donde estaba escribiendo
         System.out.print(util.cursorSave());
         System.out.print(util.cursorTo(22,1));
     }
 
-    public void addListener(Contacts contacts, User user){
+    public void addListener(User user){
 
         // Filter the incoming stanzas
         StanzaFilter message_filter = new StanzaTypeFilter(Message.class);
