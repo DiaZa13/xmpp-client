@@ -22,7 +22,7 @@ public class Connection {
     static Semaphore mutex = new Semaphore(0);
     static Semaphore mutex1 = new Semaphore(1);
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-    Scanner read = new Scanner(System.in);
+    final Scanner read = new Scanner(System.in);
 
 
     public Connection(String domain){
@@ -51,38 +51,15 @@ public class Connection {
         return stream;
     }
 
-    public void handlerSubscription(Contacts contacts, Presence presence){
-        System.out.print(util.cursorRestore());
-        System.out.printf("\033[1;33m** %s wants to subscribe to your roster \033[0m%n", presence.getFrom());
-        System.out.print(util.cursorSave());
-        System.out.print(util.cursorTo(22, 1));
-        System.out.print("\033[0;37mDo you want to accept the subscription? [Y/n] ");
-        // the readers got confused i think idk
-        String response = read.next();
-
-        // Handle request subscription
-        if ("n".equalsIgnoreCase(response)) {
-            contacts.declineSubscription(stream, presence.getFrom());
-
-            System.out.print(util.cursorRestore());
-            System.out.println("\033[0;37m** Rejected request \033[0m");
-            System.out.print(util.cursorSave());
-        } else {
-            contacts.acceptSubscription(stream, presence.getFrom());
-
-            System.out.print(util.cursorRestore());
-            System.out.println("\033[0;37m** Accepted request \033[0m");
-            System.out.print(util.cursorSave());
-        }
-
-        System.out.print(util.cursorTo(22, 1));
-    }
-
     public synchronized void presenceListener(Presence presence, User user){
 
         System.out.print(util.cursorRestore());
 
         switch (presence.getType()) {
+            case subscribe -> {
+                System.out.printf("\033[1;33m** %s sent you a subscription request \033[0m%n", presence.getFrom());
+                user.requests().push(presence.getFrom());
+            }
             case subscribed -> System.out.printf("\033[1;33m** %s is subscribed to your roster \033[0m%n", presence.getFrom());
 
             case unsubscribed -> System.out.printf("\033[1;33m** %s is unsubscribed to your roster \033[0m%n", presence.getFrom());
@@ -90,7 +67,9 @@ public class Connection {
             case available -> {
                 if (presence.getStatus() != null)
                     System.out.printf("\033[1;33m** %s has updated its status to %s \033[0m%n", presence.getFrom(), presence.getStatus());
-                else {
+                else if (presence.getMode() != null) {
+                    
+                } else {
                     String[] data = presence.getStanzaId().split("-");
                     try{
                         int id = Integer.parseInt(data[1]);
@@ -113,7 +92,7 @@ public class Connection {
             default -> System.out.printf("%s%n", presence);
         }
 
-        System.out.println(util.cursorSave());
+        System.out.print(util.cursorSave());
 
         System.out.print(util.cursorTo(22, 1));
 
@@ -156,13 +135,8 @@ public class Connection {
             }else {
                 Presence presence = (Presence) stanza;
                 if (!presence.getFrom().equals(stream.getUser())) {
-                    if (presence.getType().equals(Presence.Type.subscribe)){
-                        // If the presence is a request to subscribe to the user roster
-                        // then it creates a new thread to handle it
-                        new Thread(() -> handlerSubscription(contacts, presence)).start();
-                    }else {
                         new Thread(() -> presenceListener(presence, user)).start();
-                    }
+
                 }
             }
 

@@ -10,7 +10,6 @@ import org.jxmpp.jid.BareJid;
 import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
-
 import java.util.Collection;
 
 public class Contacts {
@@ -46,6 +45,18 @@ public class Contacts {
 
     }
 
+    public boolean deleteContact(String email){
+        try {
+            RosterEntry user = roster.getEntry(JidCreate.bareFrom(email));
+            roster.removeEntry(user);
+            return true;
+        } catch (SmackException.NotLoggedInException | SmackException.NoResponseException |
+                 XMPPException.XMPPErrorException | SmackException.NotConnectedException | InterruptedException |
+                 XmppStringprepException e) {
+            return false;
+        }
+    }
+
     public String contactDetails(String user){
         try {
             RosterEntry information = roster.getEntry(JidCreate.bareFrom(user));
@@ -64,7 +75,7 @@ public class Contacts {
 
     }
 
-    public boolean declineSubscription(AbstractXMPPConnection connection, Jid to){
+    public void declineSubscription(AbstractXMPPConnection connection, Jid to){
         Presence presence_response = connection.getStanzaFactory()
                 .buildPresenceStanza()
                 .to(to)
@@ -73,13 +84,12 @@ public class Contacts {
 
         try {
             connection.sendStanza(presence_response);
-            return true;
-        } catch (SmackException.NotConnectedException | InterruptedException e) {
-            return false;
+        } catch (SmackException.NotConnectedException | InterruptedException ignored) {
+
         }
     }
 
-    public boolean acceptSubscription(AbstractXMPPConnection connection, Jid to){
+    public void acceptSubscription(AbstractXMPPConnection connection, Jid to){
         Presence presence_response = connection.getStanzaFactory()
                 .buildPresenceStanza()
                 .to(to)
@@ -97,9 +107,7 @@ public class Contacts {
             connection.sendStanza(presence_response);
             // TODO Validate if the user is already on the roster
             connection.sendStanza(request);
-            return true;
-        } catch (SmackException.NotConnectedException | InterruptedException e) {
-            return false;
+        } catch (SmackException.NotConnectedException | InterruptedException ignored) {
         }
 
     }

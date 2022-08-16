@@ -5,11 +5,14 @@ import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.packet.Presence;
 import org.jxmpp.jid.BareJid;
 import org.jxmpp.jid.EntityFullJid;
+import org.jxmpp.jid.Jid;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
-public record User(String username, String password, Map<BareJid, EntityFullJid> roster) {
+public record User(String username, String password, Map<BareJid, EntityFullJid> roster, Stack<Jid> requests) {
 
     public User {
         if (username.isEmpty() || password.isEmpty()) {

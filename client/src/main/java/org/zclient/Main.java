@@ -2,14 +2,13 @@ package org.zclient;
 
 import org.jxmpp.jid.BareJid;
 import org.jxmpp.jid.EntityFullJid;
+import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws XmppStringprepException {
@@ -21,6 +20,7 @@ public class Main {
         String username, password, email, to_user, msg, data = "";
         String option, auth_opt;
         Map<BareJid, EntityFullJid> user_roster = new HashMap<BareJid, EntityFullJid>();
+        Stack<Jid> requests = new Stack<>();
 
         do {
             System.out.print(util.clearScreen());
@@ -43,7 +43,7 @@ public class Main {
                     username = read.nextLine();
                     System.out.print("Password: ");
                     password = read.nextLine();
-                    User user = new User(username, password, user_roster);
+                    User user = new User(username, password, user_roster, requests);
 
                     if (!authentication.singIn(user)){
                         System.out.println("\033[0;37m** It was an error while trying to log in \033[0m");
@@ -74,13 +74,15 @@ public class Main {
                             System.out.print(util.cursorRestore());
                             if (auth_opt.equals("-help")){
                                 System.out.println("\t\033[0;37m-users                            show users/contacts");
-                                System.out.println("\t-add<email>                       add a user to contacts");
-                                System.out.println("\t-details<email>                   details of a user");
+                                System.out.println("\t-request                          show pending subscription requests");
+                                System.out.println("\t-add<jid>                         add a user to your contacts");
+                                System.out.println("\t-remove<jid>                      removes a user from your contacts");
+                                System.out.println("\t-details<jid>                     details of a user");
                                 System.out.println("\t-msg<user/group jid, msg/file>    sends a message  to a group or user");
                                 System.out.println("\t-file<user jid, file path>        sends a file to the specified user");
                                 System.out.println("\t-join<room@service/nickname>      join a chat room");
                                 System.out.println("\t-presence<new presence>           edit the message presence");
-                                System.out.println("\t-show<new presence>               change the user show state");
+                                System.out.println("\t-show<new show>                   change the user presence show");
                                 System.out.println("\t-delete                           delete the actual logged account");
                                 System.out.println("\t-logout                           logout \033[0m");
 
@@ -91,15 +93,50 @@ public class Main {
 
                                 System.out.print(util.cursorSave());
 
+                            } else if (auth_opt.startsWith("-request")) {
+                                String response;
+                                if (user.requests().empty()){
+                                    System.out.println("\033[0;37m** You have no more pending requests \033[0m");
+                                }else{
+                                    Jid friend = user.requests().pop();
+                                    System.out.print(util.cursorTo(22,1) + "\033[0K");
+                                    System.out.printf("\033[0;37m -> %s wants to subscribe to your roster? [y/n] ", friend);
+                                    response = read.nextLine();
+
+                                    System.out.print(util.cursorRestore());
+                                    if (response.equalsIgnoreCase("n")){
+                                        contacts.declineSubscription(connection.getStream(), friend);
+                                        System.out.printf("\033[0;37m** Rejected request from %s \033[0m%n", friend);
+
+                                    }else{
+                                        contacts.acceptSubscription(connection.getStream(), friend);
+                                        System.out.printf("\033[0;37m** Accepted request from %s\033[0m%n", friend);
+                                    }
+                                    System.out.printf("\033[0;37m** You still have %d pending requests \033[0m%n", user.requests().size());
+                                }
+
+                                System.out.print(util.cursorSave());
+
                             } else if (auth_opt.startsWith("-add")) {
                                 email = auth_opt.substring(5,auth_opt.length()-1);
 
                                 if (contacts.addContact(email)){
-                                    System.out.println("\033[0;37m**The friendship request was sent succesfully\033[0m");
+                                    System.out.println("\033[0;37m** The friendship request was sent succesfully\033[0m");
                                 }else
-                                    System.out.println("\033[0;37m**It was an error sending the request\033[0m");
+                                    System.out.println("\033[0;37m** It was an error sending the request\033[0m");
 
                                 System.out.print(util.cursorSave());
+
+                            } else if (auth_opt.startsWith("-remove")) {
+                                email = auth_opt.substring(8,auth_opt.length()-1);
+
+                                if (contacts.deleteContact(email)){
+                                    System.out.printf("\033[0;37m** %s was removed successfully from your roster\033[0m%n",email);
+                                }else
+                                    System.out.printf("\033[0;37m** It was an error while deleting %s from your roster\033[0m%n",email);
+
+                                System.out.print(util.cursorSave());
+
 
                             } else if (auth_opt.startsWith("-details")) {
                                 username = auth_opt.substring(9,auth_opt.length()-1);
@@ -182,7 +219,7 @@ public class Main {
                     password = read.nextLine();
                     System.out.print("Email: ");
                     email = read.nextLine();
-                    User user = new User(username, password, user_roster);
+                    User user = new User(username, password, user_roster, requests);
                     authentication.singUp(user, email);
 
                     System.out.println("The account was created successfully\n");
