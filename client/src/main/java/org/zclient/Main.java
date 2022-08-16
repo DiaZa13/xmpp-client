@@ -102,7 +102,7 @@ public class  Main {
                                 Map<RosterEntry, Presence> users = contacts.getContacts();
                                 for (RosterEntry entry : users.keySet()) {
                                     String presence = users.get(entry).getType() == Presence.Type.available?util.BG:util.BR;
-                                    System.out.printf("%s *%s%n", presence, entry.getJid());
+                                    System.out.printf("%s * %s\033[0m%n", presence, entry.getJid());
                                 }
 
                                 System.out.print(util.cursorSave());
