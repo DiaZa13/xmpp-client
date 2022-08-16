@@ -1,10 +1,11 @@
 <!-- ABOUT THE PROJECT -->
 ## XMMP-CLIENT
 
-![image](https://user-images.githubusercontent.com/54074539/184996926-d2e88ba8-df31-4ef4-90e0-808e355696e2.png)
+XMPP is a open protocol based on XML. Originally was developed for instant messaging, even though nowdays is used on a varietity of communication areas, since direct messages to voice calls. The XMPP-CLIENT project is a basic chat client that uses XMPP as a protocol and java as a programming language.
+
 ![image](https://user-images.githubusercontent.com/54074539/184997585-2616bf74-8fd2-45bc-8038-13c46dcb4904.png)
 
-XMPP is a protocol bla bla bla .
+This XMPP client was developed to understand some basic and general concepts about networks and asynchronous programming. 
 
 <!-- FEATURES -->
 ### Features
@@ -89,6 +90,8 @@ Also, it is necessary to enable ansi codes on your terminal. If you don't have i
    java -jar .\target\xmmp-client-1.0.jar
    ```
    When you execute the project it will print you out a menu where you can log in into an exisiting account or create a new account on the XMPP server. Once you are logged, you can type **-help** to request the option menu. One of the most importante features develop was to sent and receive files, to test this feaure you will find o the main directory a folder named *files/send* on wich you have to save the files you want to send, and also you will find *files/received* folder where you can find the files somebody else sent you. 
+   
+   ![image](https://user-images.githubusercontent.com/54074539/184996926-d2e88ba8-df31-4ef4-90e0-808e355696e2.png)
 
 I hope you enojoy testing this amazing xmmp-client!
 
