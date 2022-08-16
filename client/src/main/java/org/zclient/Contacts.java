@@ -57,7 +57,6 @@ public class Contacts {
             return true;
         } catch (XmppStringprepException | SmackException.NotLoggedInException | SmackException.NoResponseException |
                  XMPPException.XMPPErrorException | SmackException.NotConnectedException | InterruptedException e) {
-            e.printStackTrace();
             return false;
         }
 
